@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/davrrt/smart-editor/compare/v1.0.0...v1.0.1) (2025-08-07)
+
+
+### Bug Fixes
+
+* dist ([e1a8cb8](https://github.com/davrrt/smart-editor/commit/e1a8cb8801ac56efecc3269cc24ffe27247dc183))
+* publication via dist ([9d74440](https://github.com/davrrt/smart-editor/commit/9d744408d5c138fdd49711f58f63eb88d1da7271))
+
 # 1.0.0 (2025-08-07)
 
 
