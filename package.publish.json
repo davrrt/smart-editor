@@ -1,0 +1,9 @@
+{
+  "name": "@davrrt/smart-editor",
+  "version": "0.0.0-semantic-release",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  }
+}

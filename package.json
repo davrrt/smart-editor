@@ -20,7 +20,9 @@
     "setup-git-aliases": "./setup-git-aliases.sh",
     "sort-package-json": "sort-package-json",
     "test": "jest",
-    "preversion": "npm run build"
+    "preversion": "npm run build",
+    "postbuild": "cp package.publish.json dist/package.json"
+
   },
   "config": {
     "commitizen": {
