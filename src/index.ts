@@ -1,16 +1,32 @@
 /**
- * EquiSafe Packages Template
- * A base template for creating TypeScript packages
+ * SmartEditor
+ * A WYSIWYG editor with visual templates, powered by CKEditor 5 and custom plugins.
  */
 
 /**
- * Example function that returns a greeting message
- * @param name - The name to greet
- * @returns A greeting message
+ * SmartEditor main React component
  */
-export function greet(name: string): string {
-  return `Hello, ${name}! Welcome to EquiSafe packages.`;
-}
+export { SmartEditor } from './SmartEditor';
+
+/**
+ * Main hook for SmartEditor
+ */
+export { useSmartEditor } from './useSmartEditor';
+
+/**
+ * Optional sub-hooks for advanced use
+ */
+export { useLiveEditor } from './useLiveEditor';
+export { useTemplateStore } from './useTemplateStore';
+
+/**
+ * Public types
+ */
+export * from './types/variable';
+export * from './types/condition';
+export * from './types/loop';
+export * from './types/signature';
+export * from './types/contract';
 
 /**
  * Version information
@@ -21,7 +37,7 @@ export const version = '1.0.0';
  * Package information
  */
 export const packageInfo = {
-  name: 'packages-templates',
-  description: 'Template for creating TypeScript packages',
+  name: 'smart-editor',
+  description: 'A powerful visual template editor with CKEditor 5, developed by EquiSafe.',
   author: 'EquiSafe Team'
 };

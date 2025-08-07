@@ -1,0 +1,46 @@
+import { transformHtmlToNunjucks } from "src/converters/transformHtmlToNunjucks";
+
+describe('transformHtmlToNunjucks', () => {
+  it('transforme une variable en syntaxe nunjucks', () => {
+    const html = `<span class="nunjucks-variable" data-name="user.name"></span>`;
+    const output = transformHtmlToNunjucks(html);
+    expect(output).toContain('{{ user.name }}');
+  });
+
+  it('transforme une condition en bloc nunjucks', () => {
+    const html = `<div data-nunjucks-if="user.age > 18">Majeur</div>`;
+    const output = transformHtmlToNunjucks(html);
+    expect(output).toContain('{% if user.age &gt; 18 %}');
+    expect(output).toContain('Majeur');
+    expect(output).toContain('{% endif %}');
+  });
+
+  it('transforme une boucle en bloc nunjucks', () => {
+    const html = `<div data-nunjucks-for="item in items">Item: {{ item }}</div>`;
+    const output = transformHtmlToNunjucks(html);
+    expect(output).toContain('{% for item in items %}');
+    expect(output).toContain('Item: {{ item }}');
+    expect(output).toContain('{% endfor %}');
+  });
+
+  it('transforme une signature zone', () => {
+    const html = `<div class="ck-signature-zone" contenteditable="false" data-id="sig-1" data-signer="John" data-label="Signature" data-signer-key="user.sign" data-alignment="center"></div>`;
+    const output = transformHtmlToNunjucks(html);
+    expect(output).toContain('data-signer-key="{{ user.sign }}"');
+    expect(output).toContain('data-alignment="center"');
+    expect(output).toContain('data-label="Signature"');
+  });
+
+  it('ajoute automatiquement la classe .ck au wrapper si absente', () => {
+    const html = `<p>Hello</p>`;
+    const output = transformHtmlToNunjucks(html);
+    expect(output).toContain('class="ck"');
+    expect(output).toContain('<p>Hello</p>');
+  });
+
+  it('ajoute le style CSS final au début', () => {
+    const html = `<p>Hello</p>`;
+    const output = transformHtmlToNunjucks(html);
+    expect(output.startsWith('<style>')).toBe(true);
+  });
+});

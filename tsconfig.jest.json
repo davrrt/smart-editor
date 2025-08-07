@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "isolatedModules": true,
+    "types": ["jest"],
+
+    // ⬇️ Ajoute ceci
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"]
+    }
+  }
+}
