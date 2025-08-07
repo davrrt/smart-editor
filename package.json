@@ -5,7 +5,8 @@
   "license": "UNLICENSED",
   "author": "EquiSafe Team",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup",
     "commit": "git-cz",
