@@ -1,3 +1,10 @@
+## [1.0.18](https://github.com/davrrt/smart-editor/compare/v1.0.17...v1.0.18) (2025-08-26)
+
+
+### Bug Fixes
+
+* condition plugin bug svg ([27725ef](https://github.com/davrrt/smart-editor/commit/27725ef6c43f7874dd11e1d2678304dcfeb24831))
+
 ## [1.0.17](https://github.com/davrrt/smart-editor/compare/v1.0.16...v1.0.17) (2025-08-26)
 
 
