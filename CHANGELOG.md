@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/davrrt/smart-editor/compare/v1.0.7...v1.0.8) (2025-08-26)
+
+
+### Bug Fixes
+
+* node error ([fc3e8d7](https://github.com/davrrt/smart-editor/commit/fc3e8d7817f0e422779466364c423a599251f3de))
+
 ## [1.0.7](https://github.com/davrrt/smart-editor/compare/v1.0.6...v1.0.7) (2025-08-26)
 
 
