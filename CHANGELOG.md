@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/davrrt/smart-editor/compare/v1.0.5...v1.0.6) (2025-08-26)
+
+
+### Bug Fixes
+
+* soucis de noeud ([ba75477](https://github.com/davrrt/smart-editor/commit/ba75477d5a62a8e0ab71aade0e477096ef67382b))
+
 ## [1.0.5](https://github.com/davrrt/smart-editor/compare/v1.0.4...v1.0.5) (2025-08-26)
 
 
