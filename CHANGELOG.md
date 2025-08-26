@@ -1,3 +1,10 @@
+## [1.0.13](https://github.com/davrrt/smart-editor/compare/v1.0.12...v1.0.13) (2025-08-26)
+
+
+### Bug Fixes
+
+* test erreur ci ([1a09efb](https://github.com/davrrt/smart-editor/commit/1a09efb61bb409c865b01d6ec7cc8186664d8519))
+
 ## [1.0.12](https://github.com/davrrt/smart-editor/compare/v1.0.11...v1.0.12) (2025-08-26)
 
 
