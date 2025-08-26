@@ -6,11 +6,17 @@ import { Condition } from './types/condition';
 import { Loop, LoopInput } from './types/loop';
 import { SignatureZoneEditorMeta } from './types/signature';
 import { TemplateContract } from './types/contract';
+import { createStyleApi } from './editorCommands';
 
 
 export const useSmartEditor = () => {
   const templateStore = useTemplateStore();
   const liveEditor = useLiveEditor();
+
+  // ---------------------
+  // STYLE API (bold, italic, heading...)
+    const style = createStyleApi(() => liveEditor.getEditorInstance());
+
 
 
   // ---------------------
@@ -132,6 +138,7 @@ export const useSmartEditor = () => {
   };
 
   return {
+    style,
     template,
     variable,
     condition,
