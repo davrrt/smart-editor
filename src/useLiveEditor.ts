@@ -13,34 +13,110 @@ import { Condition } from './types/condition';
 import { TemplateContract } from './types/contract';
 import { SignatureZone } from './types/signature';
 
+const clsToSelector = (cls?: string, fallback?: string) =>
+  cls && cls.trim()
+    ? '.' + cls.trim().split(/\s+/).join('.')
+    : (fallback || '');
+
 export const useLiveEditor = () => {
   const editorRef = useRef<any>(null);
   const saveCallbackRef = { current: null as null | (() => void) };
+
+  // Tous les sélecteurs calculés après init
+  const selRef = useRef({
+    // variable
+    variableWrap: '.ck-variable.ck-widget',       // fallback base
+    variableBtn: '.ck-variable-edit-button',      // fallback base
+    // condition
+    conditionHeader: '.ck-condition-header',
+    conditionBtn: '.condition-edit-button',
+    conditionContent: '.ck-condition-content',
+    // loop
+    loopHeader: '.ck-loop-header',
+    loopBtn: '.loop-edit-button',
+    loopContent: '.ck-loop-content',
+    // signature
+    signatureZone: '.ck-signature-zone',
+    signatureBtn: '.signature-button-fallback'
+  });
+
   const init = async (container: HTMLElement, editorConfig: any) => {
     if (editorRef.current) return;
     const module = await import('./internal-ckeditor.js');
     const CustomEditor = module.default as any;
     const editor = await CustomEditor.create(container, editorConfig);
     editorRef.current = editor;
+
+    // toolbar décorrélée
     const toolbarContainer = document.getElementById('toolbar-container');
     if (toolbarContainer && editor.ui.view.toolbar.element) {
       toolbarContainer.appendChild(editor.ui.view.toolbar.element);
     }
 
+    // === Récupère les classes dynamiques depuis la config CKEditor ===
+    const widgets = editor.config.get('widgets') || {};
+
+    // variable
+    selRef.current.variableWrap = clsToSelector(
+      widgets?.variable?.className,
+      '.ck-variable.ck-widget'
+    );
+    selRef.current.variableBtn = clsToSelector(
+      widgets?.variable?.button?.className,
+      '.ck-variable-edit-button'
+    );
+
+    // condition
+    selRef.current.conditionHeader = clsToSelector(
+      widgets?.condition?.header?.className,
+      '.ck-condition-header'
+    );
+    selRef.current.conditionBtn = clsToSelector(
+      widgets?.condition?.header?.button?.className,
+      '.condition-edit-button'
+    );
+    selRef.current.conditionContent = clsToSelector(
+      widgets?.condition?.content?.className,
+      '.ck-condition-content'
+    );
+
+    // loop
+    selRef.current.loopHeader = clsToSelector(
+      widgets?.loop?.header?.className,
+      '.ck-loop-header'
+    );
+    selRef.current.loopBtn = clsToSelector(
+      widgets?.loop?.header?.button?.className,
+      '.loop-edit-button'
+    );
+    selRef.current.loopContent = clsToSelector(
+      widgets?.loop?.content?.className,
+      '.ck-loop-content'
+    );
+
+    // signature
+    selRef.current.signatureZone = clsToSelector(
+      widgets?.signature?.className,
+      '.ck-signature-zone'
+    );
+    selRef.current.signatureBtn = clsToSelector(
+      widgets?.signature?.button?.className,
+      '.signature-button-fallback'
+    );
+
+    // rendu alignement signatures
     editor.editing.view.document.on('render', () => {
       const domRoot = editor.editing.view.getDomRoot();
       if (!domRoot) return;
-      domRoot.querySelectorAll('.ck-signature-zone[data-alignment]').forEach((zone: any) => {
-        const alignment = zone.getAttribute('data-alignment');
-        const wrapper = zone.closest('.ck-widget') || zone.parentElement;
-        if (wrapper && alignment) wrapper.style.textAlign = alignment;
-      });
+      domRoot
+        .querySelectorAll(`${selRef.current.signatureZone}[data-alignment]`)
+        .forEach((zone: any) => {
+          const alignment = zone.getAttribute('data-alignment');
+          const wrapper = (zone.closest('.ck-widget') as HTMLElement) || zone.parentElement;
+          if (wrapper && alignment) (wrapper as HTMLElement).style.textAlign = alignment;
+        });
     });
   };
-
-
-
-
 
   return {
     template: {
@@ -54,6 +130,7 @@ export const useLiveEditor = () => {
           contract.signatureZones
         );
         await editorRef.current?.setData(html);
+
         if (editorRef.current && !editorRef.current.commands.get('saveTemplate')) {
           editorRef.current.commands.add('saveTemplate', {
             execute: () => {
@@ -61,7 +138,7 @@ export const useLiveEditor = () => {
               if (typeof cb === 'function') cb();
               else console.warn('No saveTemplate callback provided.');
             },
-            refresh: () => { },
+            refresh: () => {},
             isEnabled: true
           });
         }
@@ -80,36 +157,37 @@ export const useLiveEditor = () => {
       onClick: (handler: () => void) => {
         editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
           const target = domEvt.domTarget as HTMLElement;
+          const {
+            loopBtn, conditionBtn, signatureBtn, signatureZone
+          } = selRef.current;
 
-          // ❌ Ne rien faire si on clique sur :
-          const isLoopButton = target.closest('.loop-edit-button');
-          const isConditionButton = target.closest('.condition-edit-button');
-          const isSignatureButton = target.closest('.signature-button-fallback');
-          const isSignatureZone = target.closest('.ck-signature-zone');
+          // on ignore les clics sur nos boutons/zone
+          if (
+            target.closest(loopBtn) ||
+            target.closest(conditionBtn) ||
+            target.closest(signatureBtn) ||
+            target.closest(signatureZone)
+          ) return;
 
-          if (isLoopButton || isConditionButton || isSignatureButton || isSignatureZone) return;
-
-          // ✅ Sinon, on déclenche (clic "extérieur")
           handler();
         });
       }
-
     },
 
     variable: {
       insert: (v: Variable, store: any, showToast: any) =>
         variableHandler.insert({ variable: v, editorInstance: editorRef.current, showToast, store }),
-      rewrite: (v: Variable, store: any, showToast: any) => {},
-        //variableHandler.rewrite({ variable: v, editorInstance: editorRef.current, showToast, store }),
+      rewrite: (_v: Variable, _store: any, _showToast: any) => {},
       remove: (name: string) =>
         variableHandler.remove({ name, editorInstance: editorRef.current }),
       onClick: (handler: (e: { type: 'variable'; name: string }) => void) => {
         editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
           const target = domEvt.domTarget as HTMLElement;
-          const varName = target.closest('.ck-widget-variable')?.getAttribute('data-name');
+          const varNode = target.closest(selRef.current.variableWrap) as HTMLElement | null;
+          const varName = varNode?.getAttribute('data-name');
           if (varName) return handler({ type: 'variable', name: varName });
         });
-      },
+      }
     },
 
     loop: {
@@ -119,13 +197,12 @@ export const useLiveEditor = () => {
       onClick: (handler: (e: { type: 'loop'; loopId: string }) => void) => {
         editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
           const target = domEvt.domTarget as HTMLElement;
-
-          const button = target.closest('.loop-edit-button');
+          const button = target.closest(selRef.current.loopBtn);
           if (!button) return;
-          const loopId = button.getAttribute('data-id');
+          const loopId = (button as HTMLElement).getAttribute('data-id');
           if (loopId) return handler({ type: 'loop', loopId });
         });
-      },
+      }
     },
 
     condition: {
@@ -135,13 +212,12 @@ export const useLiveEditor = () => {
       onClick: (handler: (e: { type: 'condition'; conditionId: string }) => void) => {
         editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
           const target = domEvt.domTarget as HTMLElement;
-          const button = target.closest('.condition-edit-button');
+          const button = target.closest(selRef.current.conditionBtn);
           if (!button) return;
-
-          const conditionId = button.getAttribute('data-id');
+          const conditionId = (button as HTMLElement).getAttribute('data-id');
           if (conditionId) handler({ type: 'condition', conditionId });
         });
-      },
+      }
     },
 
     signature: {
@@ -149,18 +225,18 @@ export const useLiveEditor = () => {
         signatureHandler.insert({ signatureZone: s, visual, showToast, editorInstance: editorRef.current }),
       rewrite: (s: SignatureZone, visual?: any, showToast?: any) =>
         signatureHandler.rewrite({ signatureZone: s, visual, showToast, editorInstance: editorRef.current }),
-      remove: (id: string) =>
-        signatureHandler.remove({ id, editorInstance: editorRef.current }),
-      onClick: (handler: (e: { type: 'signature'; signatureId: string, signatureKey: string }) => void) => {
+      remove: (id: string) => signatureHandler.remove({ id, editorInstance: editorRef.current }),
+      onClick: (handler: (e: { type: 'signature'; signatureId: string; signatureKey: string }) => void) => {
         editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
           const target = domEvt.domTarget as HTMLElement;
-          const signatureId = target.closest('.ck-signature-zone')?.getAttribute('data-id');
-          const signatureKey = target.closest('.ck-signature-zone')?.getAttribute('data-signer-key');
+          const zone = target.closest(selRef.current.signatureZone) as HTMLElement | null;
+          const signatureId = zone?.getAttribute('data-id');
+          const signatureKey = zone?.getAttribute('data-signer-key');
           if (signatureId && signatureKey) return handler({ type: 'signature', signatureId, signatureKey });
-        })
+        });
       }
     },
 
-    getEditorInstance: () => editorRef.current,
+    getEditorInstance: () => editorRef.current
   };
 };
