@@ -1,3 +1,10 @@
+## [1.0.17](https://github.com/davrrt/smart-editor/compare/v1.0.16...v1.0.17) (2025-08-26)
+
+
+### Bug Fixes
+
+* new class variable name ([5b6ebb8](https://github.com/davrrt/smart-editor/commit/5b6ebb818208b073e1d32f3ae894fdc7746cdbe2))
+
 ## [1.0.16](https://github.com/davrrt/smart-editor/compare/v1.0.15...v1.0.16) (2025-08-26)
 
 
