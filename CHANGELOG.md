@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/davrrt/smart-editor/compare/v1.0.19...v1.1.0) (2025-08-26)
+
+
+### Features
+
+* rajout pilotage externe toolbar ([5fca287](https://github.com/davrrt/smart-editor/commit/5fca2872fcac701038d1a9c31e45fe41c9b932b3))
+
 ## [1.0.19](https://github.com/davrrt/smart-editor/compare/v1.0.18...v1.0.19) (2025-08-26)
 
 
