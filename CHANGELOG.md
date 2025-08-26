@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/davrrt/smart-editor/compare/v1.0.2...v1.0.3) (2025-08-26)
+
+
+### Bug Fixes
+
+* insert variable svg ([5778f6d](https://github.com/davrrt/smart-editor/commit/5778f6d775e1f7346b76641d2d9ddd392c23bf72))
+
 ## [1.0.2](https://github.com/davrrt/smart-editor/compare/v1.0.1...v1.0.2) (2025-08-26)
 
 
