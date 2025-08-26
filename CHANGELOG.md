@@ -1,3 +1,10 @@
+## [1.0.14](https://github.com/davrrt/smart-editor/compare/v1.0.13...v1.0.14) (2025-08-26)
+
+
+### Bug Fixes
+
+* rollback ([5b762c3](https://github.com/davrrt/smart-editor/commit/5b762c35fb0ab9c213f5428f68b188213b3afb6d))
+
 ## [1.0.13](https://github.com/davrrt/smart-editor/compare/v1.0.12...v1.0.13) (2025-08-26)
 
 
