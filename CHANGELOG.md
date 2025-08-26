@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/davrrt/smart-editor/compare/v1.0.6...v1.0.7) (2025-08-26)
+
+
+### Bug Fixes
+
+* import node ([60ded53](https://github.com/davrrt/smart-editor/commit/60ded5364488bb2a1ce93ed4f0a675dbbdce8310))
+
 ## [1.0.6](https://github.com/davrrt/smart-editor/compare/v1.0.5...v1.0.6) (2025-08-26)
 
 
