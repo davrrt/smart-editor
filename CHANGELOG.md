@@ -1,3 +1,10 @@
+## [1.0.9](https://github.com/davrrt/smart-editor/compare/v1.0.8...v1.0.9) (2025-08-26)
+
+
+### Bug Fixes
+
+* svg ([5f0f7bf](https://github.com/davrrt/smart-editor/commit/5f0f7bf1e35717e81307b171bfc9b228f62daf8c))
+
 ## [1.0.8](https://github.com/davrrt/smart-editor/compare/v1.0.7...v1.0.8) (2025-08-26)
 
 
