@@ -1,3 +1,10 @@
+## [1.0.12](https://github.com/davrrt/smart-editor/compare/v1.0.11...v1.0.12) (2025-08-26)
+
+
+### Bug Fixes
+
+* temporary config ([bd91d68](https://github.com/davrrt/smart-editor/commit/bd91d6814f8f728917ab6a3c163e29159239febd))
+
 ## [1.0.11](https://github.com/davrrt/smart-editor/compare/v1.0.10...v1.0.11) (2025-08-26)
 
 
