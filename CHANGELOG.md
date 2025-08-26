@@ -1,3 +1,10 @@
+## [1.0.19](https://github.com/davrrt/smart-editor/compare/v1.0.18...v1.0.19) (2025-08-26)
+
+
+### Bug Fixes
+
+* classname static ([41f3667](https://github.com/davrrt/smart-editor/commit/41f366748a6418a27c756e02cc85926a8615f690))
+
 ## [1.0.18](https://github.com/davrrt/smart-editor/compare/v1.0.17...v1.0.18) (2025-08-26)
 
 
