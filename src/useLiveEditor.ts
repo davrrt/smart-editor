@@ -106,7 +106,7 @@ export const useLiveEditor = () => {
       onClick: (handler: (e: { type: 'variable'; name: string }) => void) => {
         editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
           const target = domEvt.domTarget as HTMLElement;
-          const varName = target.closest('.ck-variable')?.getAttribute('data-name');
+          const varName = target.closest('.ck-widget-variable')?.getAttribute('data-name');
           if (varName) return handler({ type: 'variable', name: varName });
         });
       },
