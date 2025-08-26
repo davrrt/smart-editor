@@ -1,3 +1,10 @@
+## [1.0.10](https://github.com/davrrt/smart-editor/compare/v1.0.9...v1.0.10) (2025-08-26)
+
+
+### Bug Fixes
+
+* erreur span ([94b4344](https://github.com/davrrt/smart-editor/commit/94b434477a438309271578e7e1bdc2b916422954))
+
 ## [1.0.9](https://github.com/davrrt/smart-editor/compare/v1.0.8...v1.0.9) (2025-08-26)
 
 
