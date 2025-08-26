@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/davrrt/smart-editor/compare/v1.0.4...v1.0.5) (2025-08-26)
+
+
+### Bug Fixes
+
+* erreur de plugin ([0f3288f](https://github.com/davrrt/smart-editor/commit/0f3288f896ede088d6e664b91d23a81e1c86cec0))
+
 ## [1.0.4](https://github.com/davrrt/smart-editor/compare/v1.0.3...v1.0.4) (2025-08-26)
 
 
