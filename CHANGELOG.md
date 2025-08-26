@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/davrrt/smart-editor/compare/v1.0.3...v1.0.4) (2025-08-26)
+
+
+### Bug Fixes
+
+* variable, loop ([6e81745](https://github.com/davrrt/smart-editor/commit/6e81745bf31e370f9b6b7fb3486a7cfc787338b5))
+
 ## [1.0.3](https://github.com/davrrt/smart-editor/compare/v1.0.2...v1.0.3) (2025-08-26)
 
 
