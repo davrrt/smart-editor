@@ -18,13 +18,35 @@ function run(editor: any, name: string, arg?: any) {
   const cmd = editor?.commands?.get?.(name);
   if (!cmd || editor.isReadOnly || cmd.isEnabled === false) return false;
 
-  // v19: certaines commandes prennent { value }, d’autres une valeur directe
   arg === undefined ? editor.execute(name) : editor.execute(name, arg);
   editor.editing?.view?.focus?.();
   return true;
 }
 
-/** Construit un API "style" en se basant sur une fonction qui retourne l'instance CKEditor. */
+/** Essaie d’extraire proprement la liste des familles depuis la config CKEditor. */
+function readFontFamilyOptions(editor: any): string[] {
+  const cfg = editor?.config?.get?.('fontFamily');
+  const opts = cfg?.options;
+  if (!Array.isArray(opts)) return ['default'];
+
+  const out: string[] = [];
+  for (const it of opts) {
+    let val = '';
+    if (typeof it === 'string') {
+      val = it;
+    } else if (it && typeof it === 'object') {
+      // Divers formats possibles selon versions/configs
+      // Priorités : model -> view (string) -> title -> name
+      if (typeof it.model === 'string') val = it.model;
+      else if (typeof it.view === 'string') val = it.view;
+      else if (typeof it.title === 'string') val = it.title;
+      else if (typeof it.name === 'string') val = it.name;
+    }
+    if (val && !out.includes(val)) out.push(val);
+  }
+  return out.length ? out : ['default'];
+}
+
 export function createStyleApi(getEditor: () => any) {
   const get = () => getEditor();
 
@@ -49,7 +71,28 @@ export function createStyleApi(getEditor: () => any) {
     toggleNumberedList: () => run(get(), 'numberedList'),
 
     setAlignment: (value: AlignValue) => run(get(), 'alignment', { value }),
-    setFontSize:  (value: string)     => run(get(), 'fontSize', { value }), // "12px" | "big"...
+    setFontSize:  (value: string)     => run(get(), 'fontSize', { value }),
+
+    // === Font family ===
+    /** Applique une famille (passer '' ou 'default' pour revenir au style par défaut). */
+    setFontFamily: (value: string) => {
+      const v = (value === 'default') ? '' : value;
+      return run(get(), 'fontFamily', { value: v });
+    },
+
+    /** Famille actuellement appliquée à la sélection (ou 'default' si rien). */
+    getFontFamily: (): string => {
+      const ed = get();
+      const v = ed?.commands?.get?.('fontFamily')?.value;
+      // Certaines versions renvoient undefined quand c’est la valeur par défaut
+      return (typeof v === 'string' && v.length) ? v : 'default';
+    },
+
+    /** Liste des familles disponibles configurées dans CKEditor (fontFamily.options). */
+    getFontFamilyOptions: (): string[] => {
+      const ed = get();
+      return readFontFamilyOptions(ed);
+    },
 
     addLink:    (href: string) => run(get(), 'link', normalizeUrl(href)),
     removeLink: () => run(get(), 'unlink'),
@@ -64,9 +107,13 @@ export function createStyleApi(getEditor: () => any) {
         underline:     !!cmd('underline')?.value,
         strikethrough: !!cmd('strikethrough')?.value,
 
-        heading:   cmd('heading')?.value ?? 'paragraph',
-        alignment: cmd('alignment')?.value ?? null,
-        fontSize:  cmd('fontSize')?.value ?? null,
+        heading:    cmd('heading')?.value ?? 'paragraph',
+        alignment:  cmd('alignment')?.value ?? null,
+        fontSize:   cmd('fontSize')?.value ?? null,
+        fontFamily: (() => {
+          const v = cmd('fontFamily')?.value;
+          return (typeof v === 'string' && v.length) ? v : 'default';
+        })(),
 
         can: {
           bold:          !!cmd('bold')?.isEnabled,
@@ -78,6 +125,7 @@ export function createStyleApi(getEditor: () => any) {
           numberedList:  !!cmd('numberedList')?.isEnabled,
           alignment:     !!cmd('alignment')?.isEnabled,
           fontSize:      !!cmd('fontSize')?.isEnabled,
+          fontFamily:    !!cmd('fontFamily')?.isEnabled,
           link:          !!cmd('link')?.isEnabled,
           unlink:        !!cmd('unlink')?.isEnabled,
         },
@@ -99,7 +147,6 @@ export function createStyleApi(getEditor: () => any) {
         return () => emitter?.off?.(evt, fn);
       };
 
-      // changements de sélection
       if (selection) {
         disposers.push(listen(selection, 'change:range', cb));
         disposers.push(listen(selection, 'change:attribute', cb));
@@ -108,10 +155,10 @@ export function createStyleApi(getEditor: () => any) {
         disposers.push(listen(doc, 'change', cb));
       }
 
-      // changements sur les commandes clés (value/isEnabled)
+      // Surveille aussi 'fontFamily'
       const names = [
         'bold', 'italic', 'underline', 'strikethrough',
-        'heading', 'alignment', 'fontSize',
+        'heading', 'alignment', 'fontSize', 'fontFamily',
         'bulletedList', 'numberedList', 'link', 'unlink'
       ];
       for (const n of names) {
@@ -124,7 +171,6 @@ export function createStyleApi(getEditor: () => any) {
         disposers.push(() => { c.off('change:value', h1); c.off('change:isEnabled', h2); });
       }
 
-      // readOnly
       const ro = () => cb();
       editor.on?.('change:isReadOnly', ro);
       disposers.push(() => editor.off?.('change:isReadOnly', ro));
