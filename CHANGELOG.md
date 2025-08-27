@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/davrrt/smart-editor/compare/v1.1.0...v1.1.1) (2025-08-27)
+
+
+### Bug Fixes
+
+* rajout font family ([d08374d](https://github.com/davrrt/smart-editor/commit/d08374d167858f64b1be97694bdbc9810fd2ebd9))
+
 # [1.1.0](https://github.com/davrrt/smart-editor/compare/v1.0.19...v1.1.0) (2025-08-26)
 
 
