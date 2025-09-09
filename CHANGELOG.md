@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/davrrt/smart-editor/compare/v1.1.1...v1.1.2) (2025-09-09)
+
+
+### Bug Fixes
+
+* rajout tableau et undo redo ([595c04d](https://github.com/davrrt/smart-editor/commit/595c04d841136bf46717f41985bf93017a281191))
+
 ## [1.1.1](https://github.com/davrrt/smart-editor/compare/v1.1.0...v1.1.1) (2025-08-27)
 
 
