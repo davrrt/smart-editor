@@ -89,20 +89,31 @@ export function transformHtmlToNunjucks(html: string): string {
 
 
     // Signature zones
-  doc.querySelectorAll('.ck-signature-zone').forEach(div => {
-    const label = div.getAttribute('data-label') || '';
-    const signer = div.getAttribute('data-signer') || '';
-    const key = div.getAttribute('data-signer-key') || '';
-    const alignment = div.getAttribute('data-alignment') || 'left';
-    const id = div.getAttribute('data-id') || `sign-${Math.random().toString(36).slice(2)}`;
+// Signature zones (ancre minimale, on nettoie les vieux attributs)
+doc.querySelectorAll('.ck-signature-zone').forEach(div => {
+  const id = div.getAttribute('data-id') || `sign-${Math.random().toString(36).slice(2)}`;
 
-    const isDynamic = key.includes('.') && key.match(/^[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+$/);
-    const nunjucksKey = isDynamic ? `{{ ${key} }}` : key;
+  // Nouveau monde : on privilégie data-name + data-align
+  const name = div.getAttribute('data-name') || '';
+  const align = div.getAttribute('data-align') || div.getAttribute('data-alignment') || '';
 
-    const template = document.createElement('template');
-    template.innerHTML = `<div class="ck-signature-zone" contenteditable="false" data-id="${id}" data-signer="${signer}" data-label="${label}" data-signer-key="${nunjucksKey}" data-alignment="${alignment}" style="text-align:${alignment};">&nbsp;</div>`;
-    div.replaceWith(...Array.from(template.content.childNodes));
-  });
+  // Préserver classes perso (en plus de ck-signature-zone)
+  const classes = Array.from(div.classList)
+    .filter(c => c && c !== 'ck-signature-zone')
+    .join(' ');
+
+  const attrs: string[] = [
+    `class="ck-signature-zone${classes ? ' ' + classes : ''}"`,
+    'contenteditable="false"',
+    `data-id="${id}"`
+  ];
+  if (name)  attrs.push(`data-name="${name}"`);
+  if (align) attrs.push(`data-align="${align}"`);
+
+  const template = document.createElement('template');
+  template.innerHTML = `<div ${attrs.join(' ')}></div>`;
+  div.replaceWith(...Array.from(template.content.childNodes));
+});
 
 
 

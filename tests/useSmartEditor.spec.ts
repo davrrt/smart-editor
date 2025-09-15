@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useSmartEditor, Variable, Condition, Loop, SignatureZoneEditorMeta } from 'src';
+import { useSmartEditor, Variable, Condition, Loop } from 'src';
 
 describe('useSmartEditor', () => {
   it('ajoute une variable', () => {
@@ -75,18 +75,21 @@ describe('useSmartEditor', () => {
   it('ajoute une signature zone', () => {
     const { result } = renderHook(() => useSmartEditor());
 
-    const sig: SignatureZoneEditorMeta = {
-      id: 'sign1',
-      signerKey: 'key1',
-      label: 'Signature Client',
-      signerName: 'Client',
-      align: 'right',
+    const signatureVariable: Variable = {
+      name: 'key1',
+      type: 'signature',
+      options: {
+        signerKey: 'key1',
+        label: 'Signature Client',
+        signerName: 'Client',
+        align: 'right',
+      }
     };
 
-    act(() => result.current.signature.create(sig));
+    act(() => result.current.variable.create(signatureVariable));
 
-    expect(result.current.signature.get('key1')).toEqual(sig);
-    expect(result.current.signature.getAll()).toHaveLength(1);
+    expect(result.current.variable.get('key1')).toEqual(signatureVariable);
+    expect(result.current.variable.getAll()).toHaveLength(1);
   });
 
   it('réinitialise tout via _templateStore.clear()', () => {
@@ -107,6 +110,5 @@ describe('useSmartEditor', () => {
     expect(result.current.variable.getAll()).toEqual([]);
     expect(result.current.condition.getAll()).toEqual([]);
     expect(result.current.loop.getAll()).toEqual([]);
-    expect(result.current.signature.getAll()).toEqual([]);
   });
 });

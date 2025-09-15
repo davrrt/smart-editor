@@ -4,22 +4,17 @@ import { useLiveEditor } from './useLiveEditor';
 import { Variable } from './types/variable';
 import { Condition } from './types/condition';
 import { Loop, LoopInput } from './types/loop';
-import { SignatureZoneEditorMeta } from './types/signature';
 import { TemplateContract } from './types/contract';
 import { createStyleApi } from './editorCommands';
-
+import { toSlug } from './types/variable';
 
 export const useSmartEditor = () => {
   const templateStore = useTemplateStore();
   const liveEditor = useLiveEditor();
 
-  // ---------------------
-  // STYLE API (bold, italic, heading...)
-    const style = createStyleApi(() => liveEditor.getEditorInstance());
+  // STYLE API
+  const style = createStyleApi(() => liveEditor.getEditorInstance());
 
-
-
-  // ---------------------
   // TEMPLATE
   const template = {
     load: async (contract: TemplateContract, html: string) => {
@@ -29,41 +24,112 @@ export const useSmartEditor = () => {
     getRaw: () => liveEditor.template.getRaw(),
     get: () => liveEditor.template.get(),
     getSchema: () => templateStore.getContract(),
-    destroy: async () =>  await liveEditor.template.destroy(),
-    init: async (container: HTMLElement, editorConfig: any) =>  await liveEditor.template.init(container, editorConfig),
+    destroy: async () => await liveEditor.template.destroy(),
+    init: async (container: HTMLElement, editorConfig: any) =>
+      await liveEditor.template.init(container, editorConfig),
     save: (callback: () => void) => liveEditor.template.save(callback),
-     onClick: (handler: () => void) => {
+    onClick: (handler: () => void) => {
       liveEditor.template.onClick(handler);
     },
   };
 
+  // --- helpers internes pour signatures ---
+  const _insertSignature = (v: Variable, showToast?: any) => {
+    const visual = {
+      align: (v as any)?.options?.ui?.defaultAlignment,
+      className: (v as any)?.options?.ui?.className
+    };
+    // on passe { name, type:'signature', options? } à l’handler signature interne du liveEditor
+    liveEditor.signature.insert(
+      { name: v.name, type: 'signature', options: v.options } as any,
+      visual,
+      showToast
+    );
+  };
 
-  // ---------------------
-  // VARIABLE
+  const _rewriteSignature = (v: Variable, showToast?: any) => {
+    const visual = {
+      align: (v as any)?.options?.ui?.defaultAlignment,
+      className: (v as any)?.options?.ui?.className
+    };
+    liveEditor.signature.rewrite(
+      { name: v.name, type: 'signature', options: v.options } as any,
+      visual,
+      showToast
+    );
+  };
+
+  const _removeSignature = (nameOrId: string) => {
+    // essaie de retirer l’ancre côté éditeur (l’handler sait gérer id ou name selon ton impl)
+    liveEditor.signature.remove(nameOrId);
+  };
+
+  // VARIABLE — unique API (gère inline + signature)
   const variable = {
-    create: (v: Variable) => templateStore.variable.create(v),
-    insert: (name: string, showToast: any) => {
-      const parts = name.split('.');
-      const found = parts.length > 0 ? templateStore.variable.getChild(name) : templateStore.variable.get(name);
-      if (!found) throw new Error(`Variable "${name}" not found`);
-      liveEditor.variable.insert({name, type:found.type}, templateStore.variable, showToast);
+    // crée/écrase la variable dans le contrat (pas d’insertion ici)
+    create: (v: Variable) => {
+      const normalized: Variable = { ...v, name: toSlug(v.displayName || v.name) };
+      return templateStore.variable.create(normalized);
     },
-    update: (v: Variable, showToast: any) => {
+
+    // insert: choisit inline vs signature selon le type de la variable
+    insert: (name: string, showToast?: any) => {
+      const v =
+        name.includes('.')
+          ? templateStore.variable.getChild(name) // supporte paths (object/list)
+          : templateStore.variable.get(name);
+
+      if (!v) throw new Error(`Variable "${name}" not found`);
+
+      if (v.type === 'signature') {
+        _insertSignature(v, showToast);
+      } else {
+        // inline classique
+        liveEditor.variable.insert(
+          { name: v.name, type: v.type },
+          templateStore.variable,
+          showToast
+        );
+      }
+    },
+
+    // update: route vers rewrite signature ou rewrite inline
+    update: (v: Variable, showToast?: any) => {
       templateStore.variable.update(v);
-      liveEditor.variable.rewrite(v, templateStore.variable, showToast);
+      if (v.type === 'signature') {
+        _rewriteSignature(v, showToast);
+      } else {
+        liveEditor.variable.rewrite(v, templateStore.variable, showToast);
+      }
     },
+
+    // delete: enlève du contrat + tente de retirer du contenu éditeur
     delete: (name: string) => {
+      const slug = toSlug(name);
+      const current = templateStore.variable.get(slug);
       templateStore.variable.delete(name);
-      liveEditor.variable.remove(name);
+
+      if (current?.type === 'signature') {
+        _removeSignature(slug); // retire l’ancre par data-name (slug) si possible
+      } else {
+        liveEditor.variable.remove(slug);
+      }
     },
+
     get: (name: string) => templateStore.variable.get(name),
     getAll: () => templateStore.variable.all(),
+
+    // onClick: on combine les clics inline et signature, et on renvoie toujours { type:'variable', name }
     onClick: (handler: (e: { type: 'variable'; name: string }) => void) => {
+      // variables inline
       liveEditor.variable.onClick(handler);
+      // zones de signature → on mappe vers { type:'variable', name }
+      liveEditor.signature.onClick(({ signatureKey }) => {
+        handler({ type: 'variable', name: signatureKey });
+      });
     },
   };
 
-  // ---------------------
   // CONDITION
   const condition = {
     create: (c: Condition) => templateStore.condition.create(c),
@@ -85,10 +151,8 @@ export const useSmartEditor = () => {
     onClick: (handler: (e: { type: 'condition'; conditionId: string }) => void) => {
       liveEditor.condition.onClick(handler);
     },
-
   };
 
-  // ---------------------
   // LOOP
   const loop = {
     create: (l: LoopInput | Loop) => templateStore.loop.create(l),
@@ -110,42 +174,16 @@ export const useSmartEditor = () => {
     onClick: (handler: (e: { type: 'loop'; loopId: string }) => void) => {
       liveEditor.loop.onClick(handler);
     },
-
-  };
-
-  // ---------------------
-  // SIGNATURE
-  const signature = {
-    create: (s: SignatureZoneEditorMeta) => templateStore.signature.create(s),
-    insert: (signerKey: string, showToast?: any) => {
-      const found = templateStore.signature.get(signerKey);
-      if (found) liveEditor.signature.insert(found, { id: found.id, align: found.align }, showToast);
-    },
-    update: (s: SignatureZoneEditorMeta, showToast?: any) => {
-      templateStore.signature.update(s);
-      liveEditor.signature.rewrite(s, { id: s.id, align: s.align }, showToast);
-    },
-    delete: (signerKey: string) => {
-      templateStore.signature.delete(signerKey);
-      liveEditor.signature.remove(signerKey);
-    },
-    get: (signerKey: string) => templateStore.signature.get(signerKey),
-    getAll: () => templateStore.signature.all(),
-    onClick: (handler: (e: { type: 'signature'; signatureId: string, signatureKey: string }) => void) => {
-      liveEditor.signature.onClick(handler);
-    },
-
   };
 
   return {
     style,
     template,
-    variable,
+    variable,     // <-- unique (inline + signature)
     condition,
     loop,
-    signature,
     _templateStore: templateStore,
-    _templateStoreVersion: templateStore.version, 
+    _templateStoreVersion: templateStore.version,
     _liveEditor: liveEditor,
   };
 };

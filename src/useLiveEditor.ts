@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { transformHtmlToNunjucks } from './converters/transformHtmlToNunjucks';
+// ⬇️ CHANGEMENT: le converter HTML <- Nunjucks ne reçoit plus signatureZones
 import { transformNunjucksToHtml } from './converters/transformNunjucksToHtml';
 
 import { variableHandler } from './handlers/variableHandler';
@@ -11,6 +12,7 @@ import { Variable } from './types/variable';
 import { LoopInput } from './types/loop';
 import { Condition } from './types/condition';
 import { TemplateContract } from './types/contract';
+// ⬇️ CHANGEMENT: SignatureZone (éditeur) garde un id, un name (variable), etc.
 import { SignatureZone } from './types/signature';
 
 const clsToSelector = (cls?: string, fallback?: string) =>
@@ -22,11 +24,10 @@ export const useLiveEditor = () => {
   const editorRef = useRef<any>(null);
   const saveCallbackRef = { current: null as null | (() => void) };
 
-  // Tous les sélecteurs calculés après init
   const selRef = useRef({
     // variable
-    variableWrap: '.ck-variable.ck-widget',       // fallback base
-    variableBtn: '.ck-variable-edit-button',      // fallback base
+    variableWrap: '.ck-variable.ck-widget',
+    variableBtn: '.ck-variable-edit-button',
     // condition
     conditionHeader: '.ck-condition-header',
     conditionBtn: '.condition-edit-button',
@@ -47,16 +48,14 @@ export const useLiveEditor = () => {
     const editor = await CustomEditor.create(container, editorConfig);
     editorRef.current = editor;
 
-    // toolbar décorrélée
     const toolbarContainer = document.getElementById('toolbar-container');
     if (toolbarContainer && editor.ui.view.toolbar.element) {
       toolbarContainer.appendChild(editor.ui.view.toolbar.element);
     }
 
-    // === Récupère les classes dynamiques depuis la config CKEditor ===
+    // classes dynamiques
     const widgets = editor.config.get('widgets') || {};
 
-    // variable
     selRef.current.variableWrap = clsToSelector(
       widgets?.variable?.className,
       '.ck-variable.ck-widget'
@@ -66,7 +65,6 @@ export const useLiveEditor = () => {
       '.ck-variable-edit-button'
     );
 
-    // condition
     selRef.current.conditionHeader = clsToSelector(
       widgets?.condition?.header?.className,
       '.ck-condition-header'
@@ -80,7 +78,6 @@ export const useLiveEditor = () => {
       '.ck-condition-content'
     );
 
-    // loop
     selRef.current.loopHeader = clsToSelector(
       widgets?.loop?.header?.className,
       '.ck-loop-header'
@@ -94,7 +91,6 @@ export const useLiveEditor = () => {
       '.ck-loop-content'
     );
 
-    // signature
     selRef.current.signatureZone = clsToSelector(
       widgets?.signature?.className,
       '.ck-signature-zone'
@@ -104,14 +100,14 @@ export const useLiveEditor = () => {
       '.signature-button-fallback'
     );
 
-    // rendu alignement signatures
+    // Compat alignement: data-alignment (ancien) OU data-align (nouveau)
     editor.editing.view.document.on('render', () => {
       const domRoot = editor.editing.view.getDomRoot();
       if (!domRoot) return;
       domRoot
-        .querySelectorAll(`${selRef.current.signatureZone}[data-alignment]`)
+        .querySelectorAll(`${selRef.current.signatureZone}[data-alignment], ${selRef.current.signatureZone}[data-align]`)
         .forEach((zone: any) => {
-          const alignment = zone.getAttribute('data-alignment');
+          const alignment = zone.getAttribute('data-alignment') || zone.getAttribute('data-align');
           const wrapper = (zone.closest('.ck-widget') as HTMLElement) || zone.parentElement;
           if (wrapper && alignment) (wrapper as HTMLElement).style.textAlign = alignment;
         });
@@ -122,12 +118,12 @@ export const useLiveEditor = () => {
     template: {
       init,
       load: async (contract: TemplateContract, nunjucksTemplate: string) => {
+        // ⬇️ CHANGEMENT: plus de param signatureZones — elles sont dans variables
         const html = transformNunjucksToHtml(
           nunjucksTemplate,
           contract.conditions,
           contract.loops,
-          contract.variables,
-          contract.signatureZones
+          contract.variables
         );
         await editorRef.current?.setData(html);
 
@@ -161,7 +157,6 @@ export const useLiveEditor = () => {
             loopBtn, conditionBtn, signatureBtn, signatureZone
           } = selRef.current;
 
-          // on ignore les clics sur nos boutons/zone
           if (
             target.closest(loopBtn) ||
             target.closest(conditionBtn) ||
@@ -221,6 +216,7 @@ export const useLiveEditor = () => {
     },
 
     signature: {
+      // ⬇️ CHANGEMENT: SignatureZone provient d’une variable { type:'signature', name, options? }
       insert: (s: SignatureZone, visual?: any, showToast?: any) =>
         signatureHandler.insert({ signatureZone: s, visual, showToast, editorInstance: editorRef.current }),
       rewrite: (s: SignatureZone, visual?: any, showToast?: any) =>
@@ -230,9 +226,14 @@ export const useLiveEditor = () => {
         editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
           const target = domEvt.domTarget as HTMLElement;
           const zone = target.closest(selRef.current.signatureZone) as HTMLElement | null;
-          const signatureId = zone?.getAttribute('data-id');
-          const signatureKey = zone?.getAttribute('data-signer-key');
-          if (signatureId && signatureKey) return handler({ type: 'signature', signatureId, signatureKey });
+          const signatureId = zone?.getAttribute('data-id') || '';
+          // ⬇️ CHANGEMENT: on remonte de préférence le "name" (variable), sinon l'id
+          const variableName = zone?.getAttribute('data-name') || '';
+          if (signatureId) return handler({
+            type: 'signature',
+            signatureId,
+            signatureKey: variableName || signatureId
+          });
         });
       }
     },

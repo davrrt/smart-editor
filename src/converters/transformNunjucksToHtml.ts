@@ -3,8 +3,13 @@ import { Loop } from "../types/loop";
 import { SignatureZoneEditorMeta } from "../types/signature";
 import { Variable } from "../types/variable";
 
-export function transformNunjucksToHtml(raw: string, contractConditions?: Condition[],
-  contractLoops?: Loop[], variables?: Variable[], signatureZones?: SignatureZoneEditorMeta[], processedSignatureIds: Set<string> = new Set()): string {
+export function transformNunjucksToHtml(
+  raw: string,
+  contractConditions?: Condition[],
+  contractLoops?: Loop[],
+  variables?: Variable[],
+  processedSignatureIds: Set<string> = new Set()
+): string {
   const displayToNameMap = Object.fromEntries(
     (variables || []).map(v => [v.displayName?.toLowerCase(), v.name])
   );
@@ -25,7 +30,7 @@ export function transformNunjucksToHtml(raw: string, contractConditions?: Condit
     /{%\s*for\s+([^\s]+)\s+in\s+([^\s%]+)\s*%}([\s\S]*?){%\s*endfor\s*%}/g,
     (_, alias, source, content) => {
       const loopExpr = `${alias} in ${source}`;
-      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, signatureZones, processedSignatureIds);
+      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, processedSignatureIds);
       const displayName = contractLoops?.find(
         l => l.alias === alias && l.source === source
       )?.label || loopExpr;
@@ -38,7 +43,7 @@ export function transformNunjucksToHtml(raw: string, contractConditions?: Condit
   html = html.replace(
     /{%\s*if\s+(.+?)\s*%}([\s\S]*?){%\s*endif\s*%}/g,
     (_, expression: string, content: string) => {
-      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, signatureZones, processedSignatureIds);
+      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, processedSignatureIds);
 
       const displayName =
         contractConditions?.find(c => c.expression === expression)?.label || expression;
@@ -62,40 +67,51 @@ export function transformNunjucksToHtml(raw: string, contractConditions?: Condit
   });
 
 
-  // 4. Signature zones
-  html = html.replace(
-    /<div class="ck-signature-zone"([^>]*)data-signer="([^"]+)"([^>]*)>(.*?)<\/div>/g,
-    (fullMatch, innerContent) => {
+  // 4. Signature zones (compat: on accepte anciens attributs, on sort un ancrage propre)
+html = html.replace(
+  /<div\s+class="ck-signature-zone"([\s\S]*?)>([\s\S]*?)<\/div>/g,
+  (fullMatch, attrsChunk, innerContent) => {
+    // ID
+    const idMatch = fullMatch.match(/data-id="([^"]+)"/);
+    const id = idMatch?.[1] || `sign-${Math.random().toString(36).slice(2)}`;
+    if (processedSignatureIds.has(id)) return fullMatch;
+    processedSignatureIds.add(id);
 
-      const idMatch = fullMatch.match(/data-id="([^"]+)"/);
-      const idFromHtml = idMatch?.[1];
-      // Si déjà traité, on ne touche pas
-      if (idFromHtml && processedSignatureIds.has(idFromHtml)) return fullMatch;
+    // Name (nouveau) ou fallback depuis ancien signer-key
+    let name =
+      (fullMatch.match(/data-name="([^"]+)"/)?.[1]) ||
+      '';
 
-      // On marque cet ID comme traité
-      if (idFromHtml) processedSignatureIds.add(idFromHtml);
-      const alignmentMatch = fullMatch.match(/data-alignment="([^"]+)"/);
-      const alignmentFromHtml = alignmentMatch?.[1] || 'left';
+    const legacyKey = fullMatch.match(/data-signer-key="([^"]+)"/)?.[1] || '';
 
-      let nameMatch = fullMatch.match(/data-name="([^"]+)"/);
-      if (!nameMatch) nameMatch = fullMatch.match(/data-signer-key="([^"]+)"/);
-      const cleanSigner = nameMatch?.[1];
-      // Recherche de la zone avec le signer nettoyé
-      const zone = signatureZones?.find(
-        z => z.signerKey === cleanSigner
-      );
-      if (!zone) {
-        console.warn(`⚠️ Signature zone not found for: ${cleanSigner}`);
-      }
-
-      const label = zone?.label || cleanSigner;
-      const key = zone?.signerKey || cleanSigner;
-      const id = idFromHtml;
-      const alignment = zone?.align || alignmentFromHtml;
-
-      return `<div class="ck-signature-zone" contenteditable="false" data-id="${id}" data-signer="${label}" data-label="${label}" data-signer-key="${key}" data-alignment="${alignment}" style="text-align:${alignment};">${innerContent}</div>`;
+    if (!name && legacyKey && Array.isArray(variables)) {
+      // 1) si legacyKey est déjà un "name" de variable signature
+      const byName = variables.find(v => v.type === 'signature' && v.name === legacyKey);
+      // 2) sinon, si une variable signature a options.signerKey === legacyKey
+      const byKey = variables.find(v => v.type === 'signature' && (v as any)?.options?.signerKey === legacyKey);
+      name = byName?.name || byKey?.name || '';
     }
-  );
+
+    // Align (nouveau) ou compat ancien
+    const align =
+      (fullMatch.match(/data-align="([^"]+)"/)?.[1]) ||
+      (fullMatch.match(/data-alignment="([^"]+)"/)?.[1]) ||
+      '';
+
+    // Classes : on conserve tout ce qui n'est pas la classe technique
+    const classesIn = fullMatch.match(/class="([^"]+)"/)?.[1] || '';
+    const custom = classesIn.split(/\s+/).filter(c => c && c !== 'ck-signature-zone').join(' ');
+    const clsOut = ['ck-signature-zone', custom].filter(Boolean).join(' ');
+
+    // Sortie minimaliste (pas de style inline, pas de texte)
+    return `<div class="${clsOut}" contenteditable="false" data-id="${id}"${
+      name ? ` data-name="${name}"` : ''
+    }${
+      align ? ` data-align="${align}"` : ''
+    }></div>`;
+  }
+);
+
 
   return html;
 }

@@ -1,16 +1,21 @@
 import { useState, useRef } from "react";
 import { Condition, conditionCRUD } from "./types/condition";
 import { Loop, loopCRUD, LoopInput } from "./types/loop";
-import { signatureCRUD, SignatureZoneEditorMeta } from "./types/signature";
 import { Variable, variableCRUD } from "./types/variable";
 import { TemplateContract } from "./types/contract";
+
+// Helpers signatures dans variables
+const isSignatureVar = (v: Variable) => v?.type === 'signature';
+const byName = (name: string) => (v: Variable) => v.name === name;
+const bySignerKey = (signerKey: string) => (v: Variable) =>
+  isSignatureVar(v) && (v as any)?.options?.signerKey === signerKey;
 
 export const useTemplateStore = () => {
   const [contract, _setContract] = useState<TemplateContract>({
     variables: [],
     conditions: [],
-    loops: [],
-    signatureZones: [],
+    loops: []
+    // ⬇️ CHANGEMENT: plus de signatureZones
   });
 
   const contractRef = useRef<TemplateContract>(contract);
@@ -95,22 +100,42 @@ export const useTemplateStore = () => {
     all: () => contractRef.current.loops,
   };
 
-  // --- SIGNATURES ---
-  const setSignatureZones = (zones: SignatureZoneEditorMeta[]) => {
-    setContractSafe({ ...contractRef.current, signatureZones: zones });
-    notify();
+  // --- SIGNATURES DANS VARIABLES ---
+  const setSignatureVars = (vars: Variable[]) => {
+    setVariables(vars);
   };
 
   const signature = {
-    create: (s: SignatureZoneEditorMeta) =>
-      setSignatureZones(signatureCRUD.create(contractRef.current.signatureZones, s)),
-    update: (s: SignatureZoneEditorMeta) =>
-      setSignatureZones(signatureCRUD.update(contractRef.current.signatureZones, s)),
-    delete: (signerKey: string) =>
-      setSignatureZones(signatureCRUD.delete(contractRef.current.signatureZones, signerKey)),
-    get: (signerKey: string) =>
-      contractRef.current.signatureZones.find((z) => z.signerKey === signerKey),
-    all: () => contractRef.current.signatureZones,
+    // Reco: créer/mettre à jour/supprimer par **name** (clé de variable)
+    create: (sigVar: Variable /* type:'signature' */) => {
+      if (sigVar.type !== 'signature') throw new Error('signature.create: variable must have type "signature"');
+      return setSignatureVars(variableCRUD.create(contractRef.current.variables, sigVar));
+    },
+    update: (sigVar: Variable) => {
+      if (sigVar.type !== 'signature') throw new Error('signature.update: variable must have type "signature"');
+      return setSignatureVars(variableCRUD.update(contractRef.current.variables, sigVar));
+    },
+    delete: (nameOrSignerKey: string) => {
+      const vars = contractRef.current.variables;
+      // essaye d’abord par name
+      const byNameIdx = vars.findIndex(byName(nameOrSignerKey));
+      if (byNameIdx >= 0) {
+        return setSignatureVars(variableCRUD.delete(vars, nameOrSignerKey));
+      }
+      // sinon par signerKey (compat)
+      const idxByKey = vars.findIndex(bySignerKey(nameOrSignerKey));
+      if (idxByKey >= 0) {
+        const targetName = vars[idxByKey].name;
+        return setSignatureVars(variableCRUD.delete(vars, targetName));
+      }
+      return; // rien
+    },
+    get: (nameOrSignerKey: string) => {
+      const vars = contractRef.current.variables;
+      return vars.find(byName(nameOrSignerKey))
+          || vars.find(bySignerKey(nameOrSignerKey));
+    },
+    all: () => contractRef.current.variables.filter(isSignatureVar),
   };
 
   // --- GÉNÉRAL ---
@@ -118,8 +143,7 @@ export const useTemplateStore = () => {
     const cleared = {
       variables: [],
       conditions: [],
-      loops: [],
-      signatureZones: [],
+      loops: []
     };
     setContractSafe(cleared);
     notify();
@@ -131,8 +155,7 @@ export const useTemplateStore = () => {
     setContractSafe({
       variables: newContract.variables ?? [],
       conditions: newContract.conditions ?? [],
-      loops: newContract.loops ?? [],
-      signatureZones: newContract.signatureZones ?? [],
+      loops: newContract.loops ?? []
     });
     notify();
   };
@@ -142,7 +165,7 @@ export const useTemplateStore = () => {
     version,
     condition,
     loop,
-    signature,
+    signature, // ← signatures via variables
     getContract,
     setFromContract,
     clear,

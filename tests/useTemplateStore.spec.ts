@@ -91,9 +91,23 @@ describe('useTemplateStore', () => {
       signerName: 'Client',
     };
 
-    act(() => result.current.signature.create(sig));
+    // Créer une variable de type signature avec les métadonnées dans options
+    const signatureVariable: Variable = { 
+      name: 'signera', 
+      type: 'signature',
+      options: {
+        signerKey: sig.signerKey,
+        label: sig.label,
+        align: sig.align,
+        signerName: sig.signerName
+      }
+    };
+    
+    act(() => {
+      result.current.variable.create(signatureVariable);
+    });
 
-    expect(result.current.signature.get('signerA')).toEqual(sig);
+    expect(result.current.signature.get('signera')).toEqual(signatureVariable);
   });
 
   it('réinitialise le contrat avec clear()', () => {

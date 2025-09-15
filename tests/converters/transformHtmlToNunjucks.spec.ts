@@ -24,11 +24,11 @@ describe('transformHtmlToNunjucks', () => {
   });
 
   it('transforme une signature zone', () => {
-    const html = `<div class="ck-signature-zone" contenteditable="false" data-id="sig-1" data-signer="John" data-label="Signature" data-signer-key="user.sign" data-alignment="center"></div>`;
+    const html = `<div class="ck-signature-zone" contenteditable="false" data-id="sig-1" data-name="user.sign" data-align="center"></div>`;
     const output = transformHtmlToNunjucks(html);
-    expect(output).toContain('data-signer-key="{{ user.sign }}"');
-    expect(output).toContain('data-alignment="center"');
-    expect(output).toContain('data-label="Signature"');
+    expect(output).toContain('data-name="user.sign"');
+    expect(output).toContain('data-align="center"');
+    expect(output).toContain('data-id="sig-1"');
   });
 
   it('ajoute automatiquement la classe .ck au wrapper si absente', () => {

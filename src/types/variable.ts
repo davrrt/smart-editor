@@ -1,4 +1,4 @@
-export type VariableType = 'string' | 'number' | 'boolean' | 'date' | 'list' | 'object';
+export type VariableType = 'string' | 'number' | 'boolean' | 'date' | 'list' | 'object' | 'signature';
 
 export interface VariableField {
   name: string;
