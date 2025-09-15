@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/davrrt/smart-editor/compare/v1.1.2...v1.2.0) (2025-09-15)
+
+
+### Features
+
+* rajout signature ([3e63cee](https://github.com/davrrt/smart-editor/commit/3e63ceefd0272b4c7cb5f1a39c3bcf91795092c2))
+
 ## [1.1.2](https://github.com/davrrt/smart-editor/compare/v1.1.1...v1.1.2) (2025-09-09)
 
 
