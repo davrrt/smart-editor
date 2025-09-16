@@ -1,3 +1,10 @@
+## [1.2.7](https://github.com/davrrt/smart-editor/compare/v1.2.6...v1.2.7) (2025-09-16)
+
+
+### Bug Fixes
+
+* erreur nommage ([753b3f8](https://github.com/davrrt/smart-editor/commit/753b3f86f71868038131433323d088862a87512e))
+
 ## [1.2.6](https://github.com/davrrt/smart-editor/compare/v1.2.5...v1.2.6) (2025-09-16)
 
 
