@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/davrrt/smart-editor/compare/v1.2.0...v1.2.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* debug insert object et list ([ed88159](https://github.com/davrrt/smart-editor/commit/ed8815988f9515144bee8f1562c2f3910a4b5ef5))
+
 # [1.2.0](https://github.com/davrrt/smart-editor/compare/v1.1.2...v1.2.0) (2025-09-15)
 
 
