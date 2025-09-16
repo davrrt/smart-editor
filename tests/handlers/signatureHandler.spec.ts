@@ -265,4 +265,68 @@ describe('signatureHandler', () => {
 
     expect(showToast).not.toHaveBeenCalled();
   });
+
+  it('refuse d\'insérer signataires.signature hors boucle (exemple réel)', () => {
+    const noLoopEditor = {
+      ...mockEditor,
+      model: {
+        ...mockEditor.model,
+        document: {
+          ...mockEditor.model.document,
+          selection: {
+            getFirstPosition: () => ({
+              parent: null, // aucun contexte de boucle
+            }),
+          },
+        },
+      },
+    };
+
+    const variableSignature = {
+      name: 'signataires.signature',
+      type: 'signature' as const,
+      options: {
+        label: 'Signature',
+        signerKey: 'signature'
+      }
+    };
+
+    const store = {
+      get: (name: string) => {
+        if (name === 'signataires') {
+          return {
+            name: 'signataires',
+            displayName: 'Liste des signataires',
+            type: 'list',
+            fields: [
+              { name: 'nom', displayName: 'Nom du signataire', type: 'string' },
+              { name: 'prenom', displayName: 'Prénom', type: 'string' },
+              { name: 'email', displayName: 'Email', type: 'email' },
+              { name: 'fonction', displayName: 'Fonction', type: 'string' },
+              { name: 'signature', displayName: 'Signature', type: 'signature' }
+            ],
+          };
+        }
+        return undefined;
+      },
+      all: () => []
+    };
+
+    const showToast = jest.fn();
+
+    signatureHandler.insert({ 
+      editorInstance: noLoopEditor, 
+      signatureZone: variableSignature, 
+      visual, 
+      showToast,
+      store
+    });
+
+    expect(showToast).toHaveBeenCalledWith({
+      type: 'error',
+      message: expect.stringContaining('ne pouvez insérer'),
+    });
+
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
 });

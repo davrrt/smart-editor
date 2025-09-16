@@ -75,7 +75,15 @@ export const useSmartEditor = () => {
       const parts = name.split('.');
       const found = parts.length > 0 ? templateStore.variable.getChild(name) : templateStore.variable.get(name);
       console.log('found', found);
-      if (!found) throw new Error(`Variable "${name}" not found`);
+      if (!found) {
+        if (showToast) {
+          showToast({
+            type: 'error',
+            message: `❌ Variable "${name}" non trouvée.`,
+          });
+        }
+        return;
+      }
       if (found.type === 'signature') {
         _insertSignature(found,templateStore.variable, showToast);
       } else {

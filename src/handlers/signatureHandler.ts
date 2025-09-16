@@ -133,10 +133,14 @@ export const signatureHandler = {
       const rootDefinition = store.get(rootVar);
       
       if (!rootDefinition) {
-        showToast?.({
-          type: 'error',
-          message: `❌ Variable "${rootVar}" non trouvée.`,
-        });
+        if (showToast && typeof showToast === 'function') {
+          showToast({
+            type: 'error',
+            message: `❌ Variable "${rootVar}" non trouvée.`,
+          });
+        } else {
+          console.error(`Variable "${rootVar}" non trouvée - showToast not available`);
+        }
         return;
       }
 
@@ -211,10 +215,14 @@ export const signatureHandler = {
 
       // Validation : bloquer si c'est une signature dans une liste et qu'on n'est pas dans la bonne boucle
       if ((isList && fieldPath.length > 0 && !isInsideLoop) || isObjectWithListField || (isSignatureInList && !isInsideLoop)) {
-        showToast?.({
-          type: 'error',
-          message: `❌ Vous ne pouvez insérer ${variableSignature.name} que dans une boucle adaptée.`,
-        });
+        if (showToast && typeof showToast === 'function') {
+          showToast({
+            type: 'error',
+            message: `❌ Vous ne pouvez insérer ${variableSignature.name} que dans une boucle adaptée.`,
+          });
+        } else {
+          console.error('showToast not provided or not a function - cannot show error message');
+        }
         return;
       }
 
