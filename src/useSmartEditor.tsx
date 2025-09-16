@@ -34,26 +34,29 @@ export const useSmartEditor = () => {
   };
 
   // --- helpers internes pour signatures ---
-  const _insertSignature = (v: Variable, store: any, showToast?: any) => {
+  const _insertSignature = (v: Variable, store: any, showToast?: any, fullName?: string) => {
     const visual = {
       align: (v as any)?.options?.ui?.defaultAlignment,
       className: (v as any)?.options?.ui?.className
     };
-    // on passe { name, type:'signature', options? } à l’handler signature interne du liveEditor
+    // on passe { name, type:'signature', options? } à l'handler signature interne du liveEditor
+    // Utiliser le nom complet si fourni, sinon le nom de la variable
+    const nameToUse = fullName || v.name;
     liveEditor.signature.insert(
-      { name: v.name, type: 'signature', options: v.options } as any,store,
+      { name: nameToUse, type: 'signature', options: v.options } as any,store,
       visual,
       showToast
     );
   };
 
-  const _rewriteSignature = (v: Variable, showToast?: any, store?: any) => {
+  const _rewriteSignature = (v: Variable, showToast?: any, store?: any, fullName?: string) => {
     const visual = {
       align: (v as any)?.options?.ui?.defaultAlignment,
       className: (v as any)?.options?.ui?.className
     };
+    const nameToUse = fullName || v.name;
     liveEditor.signature.rewrite(
-      { name: v.name, type: 'signature', options: v.options } as any,
+      { name: nameToUse, type: 'signature', options: v.options } as any,
       visual,
       showToast,store
     );
@@ -85,7 +88,7 @@ export const useSmartEditor = () => {
         return;
       }
       if (found.type === 'signature') {
-        _insertSignature(found,templateStore.variable, showToast);
+        _insertSignature(found, templateStore.variable, showToast, name);
       } else {
         liveEditor.variable.insert({name, type:found.type}, templateStore.variable, showToast);
         console.log('inserted', name);
