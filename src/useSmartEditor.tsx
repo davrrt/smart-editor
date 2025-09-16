@@ -71,25 +71,16 @@ export const useSmartEditor = () => {
       const normalized: Variable = { ...v, name: toSlug(v.displayName || v.name) };
       return templateStore.variable.create(normalized);
     },
-
-    // insert: choisit inline vs signature selon le type de la variable
-    insert: (name: string, showToast?: any) => {
-      const v =
-        name.includes('.')
-          ? templateStore.variable.getChild(name) // supporte paths (object/list)
-          : templateStore.variable.get(name);
-
-      if (!v) throw new Error(`Variable "${name}" not found`);
-
-      if (v.type === 'signature') {
-        _insertSignature(v, showToast);
+    insert: (name: string, showToast: any) => {
+      const parts = name.split('.');
+      const found = parts.length > 0 ? templateStore.variable.getChild(name) : templateStore.variable.get(name);
+      console.log('found', found);
+      if (!found) throw new Error(`Variable "${name}" not found`);
+      if (found.type === 'signature') {
+        _insertSignature(found, showToast);
       } else {
-        // inline classique
-        liveEditor.variable.insert(
-          { name: v.name, type: v.type },
-          templateStore.variable,
-          showToast
-        );
+        liveEditor.variable.insert({name, type:found.type}, templateStore.variable, showToast);
+        console.log('inserted', name);
       }
     },
 
