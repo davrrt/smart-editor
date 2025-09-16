@@ -1,3 +1,10 @@
+## [1.2.8](https://github.com/davrrt/smart-editor/compare/v1.2.7...v1.2.8) (2025-09-16)
+
+
+### Bug Fixes
+
+* test variable ([f3f7904](https://github.com/davrrt/smart-editor/commit/f3f7904de973d32db531ad7b9ca2e07d0178b4f1))
+
 ## [1.2.7](https://github.com/davrrt/smart-editor/compare/v1.2.6...v1.2.7) (2025-09-16)
 
 
