@@ -34,20 +34,20 @@ export const useSmartEditor = () => {
   };
 
   // --- helpers internes pour signatures ---
-  const _insertSignature = (v: Variable, showToast?: any) => {
+  const _insertSignature = (v: Variable, store: any, showToast?: any) => {
     const visual = {
       align: (v as any)?.options?.ui?.defaultAlignment,
       className: (v as any)?.options?.ui?.className
     };
     // on passe { name, type:'signature', options? } à l’handler signature interne du liveEditor
     liveEditor.signature.insert(
-      { name: v.name, type: 'signature', options: v.options } as any,
+      { name: v.name, type: 'signature', options: v.options } as any,store,
       visual,
       showToast
     );
   };
 
-  const _rewriteSignature = (v: Variable, showToast?: any) => {
+  const _rewriteSignature = (v: Variable, showToast?: any, store?: any) => {
     const visual = {
       align: (v as any)?.options?.ui?.defaultAlignment,
       className: (v as any)?.options?.ui?.className
@@ -55,7 +55,7 @@ export const useSmartEditor = () => {
     liveEditor.signature.rewrite(
       { name: v.name, type: 'signature', options: v.options } as any,
       visual,
-      showToast
+      showToast,store
     );
   };
 
@@ -77,7 +77,7 @@ export const useSmartEditor = () => {
       console.log('found', found);
       if (!found) throw new Error(`Variable "${name}" not found`);
       if (found.type === 'signature') {
-        _insertSignature(found, showToast);
+        _insertSignature(found,templateStore.variable, showToast);
       } else {
         liveEditor.variable.insert({name, type:found.type}, templateStore.variable, showToast);
         console.log('inserted', name);
@@ -88,7 +88,7 @@ export const useSmartEditor = () => {
     update: (v: Variable, showToast?: any) => {
       templateStore.variable.update(v);
       if (v.type === 'signature') {
-        _rewriteSignature(v, showToast);
+        _rewriteSignature(v, showToast, templateStore.variable);
       } else {
         liveEditor.variable.rewrite(v, templateStore.variable, showToast);
       }

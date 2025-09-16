@@ -1,3 +1,4 @@
+import { Variable } from 'src/types/variable';
 import { SignatureZone } from '../types/signature';
 
 interface SignatureHandlerParams {
@@ -8,6 +9,10 @@ interface SignatureHandlerParams {
     align?: 'left' | 'center' | 'right';
   };
   showToast?: (args: { type?: 'success' | 'error'; message: string }) => void;
+  store: {
+    all: () => Variable[];
+    get: (name: string) => Variable | undefined;
+  };
 }
 
 interface RemoveSignatureParams {
@@ -106,6 +111,7 @@ export const signatureHandler = {
     visual,
     showToast,
     mode,
+    store,
   }: SignatureHandlerParams & { mode: 'insert'}) => {
     if (!editorInstance) return;
     const id = visual?.id ?? crypto.randomUUID();
@@ -122,32 +128,93 @@ export const signatureHandler = {
       // Nouveau format : Variable avec { name, type: 'signature', options? }
       const variableSignature = signatureZone as { name: string; type: 'signature'; options?: any };
       const parts = variableSignature.name.split('.');
+      const rootVar = parts[0];
+      const fieldPath = parts.slice(1);
+      const rootDefinition = store.get(rootVar);
       
-      // Si la signature est enfant d'une liste (ex: signatures.signature)
-      if (parts.length > 1) {
-        const rootVar = parts[0];
-        loopRef = rootVar; // La liste parente
-        
-        // Vérifier si on est dans la bonne boucle
-        const selection = editorInstance.model.document.selection;
-        let parent = selection.getFirstPosition()?.parent;
-        let isInsideCorrectLoop = false;
+      if (!rootDefinition) {
+        showToast?.({
+          type: 'error',
+          message: `❌ Variable "${rootVar}" non trouvée.`,
+        });
+        return;
+      }
 
-        while (parent) {
-          if (parent.name === 'loopBlock' && parent.getAttribute('collection') === loopRef) {
-            isInsideCorrectLoop = true;
-            break;
+      // Logique de validation inspirée de variableHandler
+      const isList = rootDefinition.type === 'list';
+      let isObjectWithListField = false;
+      let isSignatureInList = false;
+
+      if (rootDefinition.type === 'object') {
+        let current = rootDefinition;
+        for (const part of fieldPath) {
+          const sub = current.fields?.find(f => f.name === part);
+          if (!sub) break;
+          if (sub.type === 'list') isObjectWithListField = true;
+          if (sub.type === 'object') current = sub;
+        }
+      }
+
+      // Vérifier si la signature est enfant d'une liste
+      if (fieldPath.length > 0) {
+        let current = rootDefinition;
+        for (let i = 0; i < fieldPath.length; i++) {
+          const part = fieldPath[i];
+          const sub = current.fields?.find(f => f.name === part);
+          if (!sub) break;
+          
+          if (sub.type === 'list' && i === fieldPath.length - 1) {
+            isSignatureInList = true;
+          } else if (sub.type === 'list' && i < fieldPath.length - 1) {
+            let finalField = sub;
+            for (let j = i + 1; j < fieldPath.length; j++) {
+              const nextPart = fieldPath[j];
+              const nextSub = finalField.fields?.find(f => f.name === nextPart);
+              if (!nextSub) break;
+              finalField = nextSub;
+            }
+            isSignatureInList = finalField.type === 'signature';
+          } else if (sub.type === 'list' && i === 0 && fieldPath.length === 2) {
+            const nextPart = fieldPath[1];
+            const signatureField = sub.fields?.find(f => f.name === nextPart);
+            if (signatureField && signatureField.type === 'signature') {
+              isSignatureInList = true;
+            }
           }
-          parent = parent.parent;
+          
+          if (sub.type === 'object') current = sub;
         }
+      }
 
-        if (!isInsideCorrectLoop) {
-          showToast?.({
-            type: 'error',
-            message: `❌ Vous ne pouvez insérer ${variableSignature.name} que dans une boucle adaptée.`,
-          });
-          return;
+      // Vérifier si on est dans une boucle
+      const selection = editorInstance.model.document.selection;
+      let parent = selection.getFirstPosition()?.parent;
+      let isInsideLoop = false;
+      let alias = 'item';
+
+      while (parent) {
+        if (parent.name === 'loopBlock' && parent.getAttribute('collection') === rootVar) {
+          isInsideLoop = true;
+          alias = parent.getAttribute('item') || 'item';
+          break;
         }
+        parent = parent.parent;
+      }
+
+      // Validation : bloquer si c'est une signature dans une liste et qu'on n'est pas dans la bonne boucle
+      if ((isList && fieldPath.length > 0 && !isInsideLoop) || isObjectWithListField || (isSignatureInList && !isInsideLoop)) {
+        showToast?.({
+          type: 'error',
+          message: `❌ Vous ne pouvez insérer ${variableSignature.name} que dans une boucle adaptée.`,
+        });
+        return;
+      }
+
+      // Si on est dans une boucle, utiliser l'alias
+      if (isList && isInsideLoop && fieldPath.length === 1) {
+        loopRef = rootVar;
+      } else if (fieldPath.length > 1) {
+        loopRef = rootVar;
       }
       
       label = variableSignature.options?.label || variableSignature.name;

@@ -162,13 +162,31 @@ describe('signatureHandler', () => {
       }
     };
 
+    const store = {
+      get: (name: string) => {
+        if (name === 'signatures') {
+          return {
+            name: 'signatures',
+            type: 'list',
+            fields: [
+              { name: 'signature', type: 'signature' },
+              { name: 'date', type: 'date' },
+            ],
+          };
+        }
+        return undefined;
+      },
+      all: () => []
+    };
+
     const showToast = jest.fn();
 
     signatureHandler.insert({ 
       editorInstance: noLoopEditor, 
       signatureZone: variableSignature, 
       visual, 
-      showToast 
+      showToast,
+      store
     });
 
     expect(showToast).toHaveBeenCalledWith({
@@ -212,13 +230,31 @@ describe('signatureHandler', () => {
       }
     };
 
+    const store = {
+      get: (name: string) => {
+        if (name === 'signatures') {
+          return {
+            name: 'signatures',
+            type: 'list',
+            fields: [
+              { name: 'signature', type: 'signature' },
+              { name: 'date', type: 'date' },
+            ],
+          };
+        }
+        return undefined;
+      },
+      all: () => []
+    };
+
     const showToast = jest.fn();
 
     signatureHandler.insert({ 
       editorInstance: signaturesLoopEditor, 
       signatureZone: variableSignature, 
       visual, 
-      showToast 
+      showToast,
+      store
     });
 
     expect(mockExecute).toHaveBeenCalledWith('insertSignatureZone', expect.objectContaining({

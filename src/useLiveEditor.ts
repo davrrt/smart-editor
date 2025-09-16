@@ -217,10 +217,10 @@ export const useLiveEditor = () => {
 
     signature: {
       // ⬇️ CHANGEMENT: SignatureZone provient d’une variable { type:'signature', name, options? }
-      insert: (s: SignatureZone, visual?: any, showToast?: any) =>
-        signatureHandler.insert({ signatureZone: s, visual, showToast, editorInstance: editorRef.current }),
-      rewrite: (s: SignatureZone, visual?: any, showToast?: any) =>
-        signatureHandler.rewrite({ signatureZone: s, visual, showToast, editorInstance: editorRef.current }),
+      insert: (s: SignatureZone,store: any, visual?: any, showToast?: any) =>
+        signatureHandler.insert({ signatureZone: s, visual, showToast, editorInstance: editorRef.current,store }),
+      rewrite: (s: SignatureZone, visual?: any, showToast?: any, store?: any) =>
+        signatureHandler.rewrite({ signatureZone: s, visual, showToast, editorInstance: editorRef.current, store }),
       remove: (id: string) => signatureHandler.remove({ id, editorInstance: editorRef.current }),
       onClick: (handler: (e: { type: 'signature'; signatureId: string; signatureKey: string }) => void) => {
         editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
