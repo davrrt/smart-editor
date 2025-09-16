@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/davrrt/smart-editor/compare/v1.2.1...v1.2.2) (2025-09-16)
+
+
+### Bug Fixes
+
+* debug signature liste ([9ce6ca5](https://github.com/davrrt/smart-editor/commit/9ce6ca53356d9404a76175d643b2243835844559))
+
 ## [1.2.1](https://github.com/davrrt/smart-editor/compare/v1.2.0...v1.2.1) (2025-09-16)
 
 
