@@ -160,4 +160,125 @@ describe('variableHandler', () => {
       variableHandler.remove({ editorInstance: null as any, name: 'clients.name' })
     ).not.toThrow();
   });
+
+  it('refuse d\'insérer une signature dans une liste hors boucle', () => {
+    const noLoopEditor = {
+      ...mockEditor,
+      model: {
+        ...mockEditor.model,
+        document: {
+          ...mockEditor.model.document,
+          selection: {
+            getFirstPosition: () => ({
+              parent: null, // aucun contexte de boucle
+            }),
+          },
+        },
+      },
+    };
+
+    // Mock du store pour inclure une liste avec des signatures
+    const storeWithSignatures = {
+      ...store,
+      get: (name: string): Variable | undefined => {
+        if (name === 'signatures') {
+          return {
+            name: 'signatures',
+            type: 'list',
+            displayName: '{{ signatures }}',
+            fields: [
+              { name: 'signature', type: 'signature' },
+              { name: 'date', type: 'date' },
+            ],
+          };
+        }
+        return store.get(name);
+      },
+    };
+
+    const signatureVariable: Variable = {
+      name: 'signatures.signature',
+      type: 'signature',
+      displayName: '{{ signatures.signature }}',
+    };
+
+    variableHandler.insert({ 
+      variable: signatureVariable, 
+      editorInstance: noLoopEditor, 
+      store: storeWithSignatures, 
+      showToast 
+    });
+
+    expect(showToast).toHaveBeenCalledWith({
+      type: 'error',
+      message: expect.stringContaining('ne pouvez insérer'),
+    });
+
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
+  it('permet d\'insérer une signature dans une liste à l\'intérieur d\'une boucle', () => {
+    // Mock du store pour inclure une liste avec des signatures
+    const storeWithSignatures = {
+      ...store,
+      get: (name: string): Variable | undefined => {
+        if (name === 'signatures') {
+          return {
+            name: 'signatures',
+            type: 'list',
+            displayName: '{{ signatures }}',
+            fields: [
+              { name: 'signature', type: 'signature' },
+              { name: 'date', type: 'date' },
+            ],
+          };
+        }
+        return store.get(name);
+      },
+    };
+
+    // Créer un éditeur mock avec une boucle pour 'signatures'
+    const signaturesLoopEditor = {
+      ...mockEditor,
+      model: {
+        ...mockEditor.model,
+        document: {
+          ...mockEditor.model.document,
+          selection: {
+            getFirstPosition: () => ({
+              parent: {
+                name: 'loopBlock',
+                getAttribute: (attr: string) => {
+                  if (attr === 'collection') return 'signatures';
+                  if (attr === 'item') return 's';
+                  return null;
+                },
+                parent: null,
+              },
+            }),
+          },
+        },
+      },
+    };
+
+    const signatureVariable: Variable = {
+      name: 'signatures.signature',
+      type: 'signature',
+      displayName: '{{ signatures.signature }}',
+    };
+
+    variableHandler.insert({ 
+      variable: signatureVariable, 
+      editorInstance: signaturesLoopEditor, 
+      store: storeWithSignatures, 
+      showToast 
+    });
+
+    expect(mockExecute).toHaveBeenCalledWith('insertVariable', {
+      name: 's.signature',
+      original: '{{ signatures.signature }}',
+    });
+
+    expect(showToast).not.toHaveBeenCalled();
+  });
 });
