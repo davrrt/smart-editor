@@ -2,7 +2,7 @@ import { SignatureZone } from '../types/signature';
 
 interface SignatureHandlerParams {
   editorInstance: any;
-  signatureZone: SignatureZone;
+  signatureZone: SignatureZone | { name: string; type: 'signature'; options?: any };
   visual?: {
     id?: string;
     align?: 'left' | 'center' | 'right';
@@ -29,7 +29,7 @@ export const signatureHandler = {
     if (!id) return;
 
     const alignment = visual?.align ?? 'left';
-    const loopRef = signatureZone.loopRef;
+    const loopRef = 'loopRef' in signatureZone ? signatureZone.loopRef : undefined;
 
     // Vérifie la position dans une boucle si nécessaire
     if (loopRef) {
@@ -48,7 +48,7 @@ export const signatureHandler = {
       if (!isInsideCorrectLoop) {
         showToast?.({
           type: 'error',
-          message: `❌ La signature "${signatureZone.label}" doit être insérée dans la boucle "${loopRef}".`,
+          message: `❌ La signature "${'label' in signatureZone ? signatureZone.label : (signatureZone as any).options?.label || (signatureZone as any).name}" doit être insérée dans la boucle "${loopRef}".`,
         });
         return;
       }
@@ -65,8 +65,10 @@ export const signatureHandler = {
           el.name === 'signatureZone' &&
           el.getAttribute('id') === id
         ) {
-          writer.setAttribute('label', signatureZone.label, el);
-          writer.setAttribute('signerKey', signatureZone.signerKey, el);
+          const label = 'label' in signatureZone ? signatureZone.label : (signatureZone as any).options?.label || (signatureZone as any).name;
+          const signerKey = 'signerKey' in signatureZone ? signatureZone.signerKey : (signatureZone as any).options?.signerKey || (signatureZone as any).name;
+          writer.setAttribute('label', label, el);
+          writer.setAttribute('signerKey', signerKey, el);
           writer.setAttribute('alignment', alignment, el);
           if (loopRef) writer.setAttribute('loopRef', loopRef, el);
           found = true;
@@ -108,35 +110,83 @@ export const signatureHandler = {
     if (!editorInstance) return;
     const id = visual?.id ?? crypto.randomUUID();
     const alignment = visual?.align ?? 'left';
-    const loopRef = signatureZone.loopRef;
+    
+    // Détecter si c'est l'ancienne interface (SignatureZone) ou la nouvelle (Variable)
+    const isNewFormat = 'name' in signatureZone && 'type' in signatureZone;
+    
+    let loopRef: string | undefined;
+    let label: string;
+    let signerKey: string;
+    
+    if (isNewFormat) {
+      // Nouveau format : Variable avec { name, type: 'signature', options? }
+      const variableSignature = signatureZone as { name: string; type: 'signature'; options?: any };
+      const parts = variableSignature.name.split('.');
+      
+      // Si la signature est enfant d'une liste (ex: signatures.signature)
+      if (parts.length > 1) {
+        const rootVar = parts[0];
+        loopRef = rootVar; // La liste parente
+        
+        // Vérifier si on est dans la bonne boucle
+        const selection = editorInstance.model.document.selection;
+        let parent = selection.getFirstPosition()?.parent;
+        let isInsideCorrectLoop = false;
 
-    if (loopRef) {
-      const selection = editorInstance.model.document.selection;
-      let parent = selection.getFirstPosition()?.parent;
-      let isInsideCorrectLoop = false;
-
-      while (parent) {
-        if (parent.name === 'loopBlock' && parent.getAttribute('collection') === loopRef) {
-          isInsideCorrectLoop = true;
-          break;
+        while (parent) {
+          if (parent.name === 'loopBlock' && parent.getAttribute('collection') === loopRef) {
+            isInsideCorrectLoop = true;
+            break;
+          }
+          parent = parent.parent;
         }
-        parent = parent.parent;
-      }
 
-      if (!isInsideCorrectLoop) {
-        showToast?.({
-          type: 'error',
-          message: `❌ La signature "${signatureZone.label}" doit être insérée dans la boucle "${loopRef}".`,
-        });
-        return;
+        if (!isInsideCorrectLoop) {
+          showToast?.({
+            type: 'error',
+            message: `❌ Vous ne pouvez insérer ${variableSignature.name} que dans une boucle adaptée.`,
+          });
+          return;
+        }
+      }
+      
+      label = variableSignature.options?.label || variableSignature.name;
+      signerKey = variableSignature.options?.signerKey || variableSignature.name;
+    } else {
+      // Ancien format : SignatureZone
+      const oldSignature = signatureZone as SignatureZone;
+      loopRef = oldSignature.loopRef;
+      label = oldSignature.label;
+      signerKey = oldSignature.signerKey;
+      
+      if (loopRef) {
+        const selection = editorInstance.model.document.selection;
+        let parent = selection.getFirstPosition()?.parent;
+        let isInsideCorrectLoop = false;
+
+        while (parent) {
+          if (parent.name === 'loopBlock' && parent.getAttribute('collection') === loopRef) {
+            isInsideCorrectLoop = true;
+            break;
+          }
+          parent = parent.parent;
+        }
+
+        if (!isInsideCorrectLoop) {
+          showToast?.({
+            type: 'error',
+            message: `❌ La signature "${label}" doit être insérée dans la boucle "${loopRef}".`,
+          });
+          return;
+        }
       }
     }
 
     try {
       editorInstance.execute('insertSignatureZone', {
         id,
-        label: signatureZone.label,
-        signerKey: signatureZone.signerKey,
+        label,
+        signerKey,
         alignment,
         ...(loopRef ? { loopRef } : {}),
       });

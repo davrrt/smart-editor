@@ -136,4 +136,97 @@ describe('signatureHandler', () => {
       })
     ).not.toThrow();
   });
+
+  it('refuse d\'insérer une signature dans une liste hors boucle (nouveau format)', () => {
+    const noLoopEditor = {
+      ...mockEditor,
+      model: {
+        ...mockEditor.model,
+        document: {
+          ...mockEditor.model.document,
+          selection: {
+            getFirstPosition: () => ({
+              parent: null, // aucun contexte de boucle
+            }),
+          },
+        },
+      },
+    };
+
+    const variableSignature = {
+      name: 'signatures.signature',
+      type: 'signature' as const,
+      options: {
+        label: 'Signature',
+        signerKey: 'signature'
+      }
+    };
+
+    const showToast = jest.fn();
+
+    signatureHandler.insert({ 
+      editorInstance: noLoopEditor, 
+      signatureZone: variableSignature, 
+      visual, 
+      showToast 
+    });
+
+    expect(showToast).toHaveBeenCalledWith({
+      type: 'error',
+      message: expect.stringContaining('ne pouvez insérer'),
+    });
+
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
+  it('permet d\'insérer une signature dans une liste à l\'intérieur d\'une boucle (nouveau format)', () => {
+    const signaturesLoopEditor = {
+      ...mockEditor,
+      model: {
+        ...mockEditor.model,
+        document: {
+          ...mockEditor.model.document,
+          selection: {
+            getFirstPosition: () => ({
+              parent: {
+                name: 'loopBlock',
+                getAttribute: (attr: string) => {
+                  if (attr === 'collection') return 'signatures';
+                  if (attr === 'item') return 's';
+                  return null;
+                },
+                parent: null,
+              },
+            }),
+          },
+        },
+      },
+    };
+
+    const variableSignature = {
+      name: 'signatures.signature',
+      type: 'signature' as const,
+      options: {
+        label: 'Signature',
+        signerKey: 'signature'
+      }
+    };
+
+    const showToast = jest.fn();
+
+    signatureHandler.insert({ 
+      editorInstance: signaturesLoopEditor, 
+      signatureZone: variableSignature, 
+      visual, 
+      showToast 
+    });
+
+    expect(mockExecute).toHaveBeenCalledWith('insertSignatureZone', expect.objectContaining({
+      label: 'Signature',
+      signerKey: 'signature',
+      loopRef: 'signatures'
+    }));
+
+    expect(showToast).not.toHaveBeenCalled();
+  });
 });
