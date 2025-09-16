@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/davrrt/smart-editor/compare/v1.2.3...v1.2.4) (2025-09-16)
+
+
+### Bug Fixes
+
+* bug signature insert ([5c70824](https://github.com/davrrt/smart-editor/commit/5c7082429517ce86a8479e12b5758fec4ca43a2b))
+
 ## [1.2.3](https://github.com/davrrt/smart-editor/compare/v1.2.2...v1.2.3) (2025-09-16)
 
 
