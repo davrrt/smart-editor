@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/davrrt/smart-editor/compare/v1.2.4...v1.2.5) (2025-09-16)
+
+
+### Bug Fixes
+
+* toast signature erreur ([2f2c9bd](https://github.com/davrrt/smart-editor/commit/2f2c9bd9265dbee4a1d97c21401477c6ca44381d))
+
 ## [1.2.4](https://github.com/davrrt/smart-editor/compare/v1.2.3...v1.2.4) (2025-09-16)
 
 
