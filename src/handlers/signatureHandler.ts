@@ -186,6 +186,14 @@ export const signatureHandler = {
         }
       }
 
+      // Cas spécial : si la racine est une liste et qu'on a un champ, vérifier si c'est une signature
+      if (isList && fieldPath.length === 1) {
+        const field = rootDefinition.fields?.find(f => f.name === fieldPath[0]);
+        if (field && field.type === 'signature') {
+          isSignatureInList = true;
+        }
+      }
+
       // Vérifier si on est dans une boucle
       const selection = editorInstance.model.document.selection;
       let parent = selection.getFirstPosition()?.parent;
