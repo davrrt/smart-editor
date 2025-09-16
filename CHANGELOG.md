@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/davrrt/smart-editor/compare/v1.2.2...v1.2.3) (2025-09-16)
+
+
+### Bug Fixes
+
+* blocage loop ([b5ad09a](https://github.com/davrrt/smart-editor/commit/b5ad09a2492807f9872846c784e8a52c4b915c16))
+
 ## [1.2.2](https://github.com/davrrt/smart-editor/compare/v1.2.1...v1.2.2) (2025-09-16)
 
 
