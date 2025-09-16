@@ -77,4 +77,22 @@ describe('transformNunjucksToHtml', () => {
     expect(output).toContain('<!--STYLE_BLOCK_0--><p>Hello</p>');
     expect(output).toContain('<p>Hello</p>');
   });
+
+  it('gère les signatures dans les listes avec legacy signer-key', () => {
+    const listWithSignature: Variable[] = [
+      {
+        name: 'signataires',
+        type: 'list',
+        fields: [
+          { name: 'nom', type: 'string' },
+          { name: 'signature', type: 'signature' }
+        ]
+      }
+    ];
+
+    const raw = `<div class="ck-signature-zone" data-id="sig-1" data-signer-key="signature"></div>`;
+    const output = transformNunjucksToHtml(raw, [], [], listWithSignature, new Set());
+    expect(output).toContain('data-name="signataires.signature"');
+    expect(output).toContain('data-id="sig-1"');
+  });
 });

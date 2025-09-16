@@ -1,5 +1,6 @@
 import { signatureHandler } from 'src/handlers/signatureHandler';
 import type { SignatureZone } from 'src/types/signature';
+import type { VariableType } from 'src/types/variable';
 
 describe('signatureHandler', () => {
   const mockExecute = jest.fn();
@@ -50,24 +51,30 @@ describe('signatureHandler', () => {
 
   const showToast = jest.fn();
 
+  const mockStore = {
+    get: jest.fn(),
+    all: jest.fn(() => [])
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('insère une signature correctement', () => {
-    signatureHandler.insert({ editorInstance: mockEditor, signatureZone, visual });
+    signatureHandler.insert({ editorInstance: mockEditor, signatureZone, visual, store: mockStore });
 
     expect(mockExecute).toHaveBeenCalledWith('insertSignatureZone', {
       id: expect.any(String),
       label: 'Signature Client',
       signerKey: 'client_1',
       alignment: 'center',
+      name: 'Signature Client', // Le nom par défaut pour l'ancien format
       loopRef: 'clients',
     });
   });
 
   it('réécrit une signature existante avec setAttribute', () => {
-    signatureHandler.rewrite({ editorInstance: mockEditor, signatureZone, visual });
+    signatureHandler.rewrite({ editorInstance: mockEditor, signatureZone, visual, store: mockStore });
 
     expect(mockSetAttr).toHaveBeenCalledWith('label', 'Signature Client', expect.any(Object));
     expect(mockSetAttr).toHaveBeenCalledWith('signerKey', 'client_1', expect.any(Object));
@@ -80,7 +87,7 @@ describe('signatureHandler', () => {
       getChildren: () => [], // rien trouvé
     });
 
-    signatureHandler.rewrite({ editorInstance: mockEditor, signatureZone, visual });
+    signatureHandler.rewrite({ editorInstance: mockEditor, signatureZone, visual, store: mockStore });
 
     expect(mockExecute).toHaveBeenCalledWith('insertSignatureZone', expect.objectContaining({
       label: 'Signature Client',
@@ -118,6 +125,7 @@ describe('signatureHandler', () => {
       signatureZone,
       visual,
       showToast,
+      store: mockStore,
     });
 
     expect(showToast).toHaveBeenCalledWith({
@@ -133,6 +141,7 @@ describe('signatureHandler', () => {
         editorInstance: null as any,
         signatureZone,
         visual,
+        store: mockStore,
       })
     ).not.toThrow();
   });
@@ -167,10 +176,10 @@ describe('signatureHandler', () => {
         if (name === 'signatures') {
           return {
             name: 'signatures',
-            type: 'list',
+            type: 'list' as VariableType,
             fields: [
-              { name: 'signature', type: 'signature' },
-              { name: 'date', type: 'date' },
+              { name: 'signature', type: 'signature' as VariableType },
+              { name: 'date', type: 'date' as VariableType },
             ],
           };
         }
@@ -235,10 +244,10 @@ describe('signatureHandler', () => {
         if (name === 'signatures') {
           return {
             name: 'signatures',
-            type: 'list',
+            type: 'list' as VariableType,
             fields: [
-              { name: 'signature', type: 'signature' },
-              { name: 'date', type: 'date' },
+              { name: 'signature', type: 'signature' as VariableType },
+              { name: 'date', type: 'date' as VariableType },
             ],
           };
         }
@@ -260,6 +269,7 @@ describe('signatureHandler', () => {
     expect(mockExecute).toHaveBeenCalledWith('insertSignatureZone', expect.objectContaining({
       label: 'Signature',
       signerKey: 'signature',
+      name: 'signatures.signature', // Le nom complet de la variable
       loopRef: 'signatures'
     }));
 
@@ -297,13 +307,13 @@ describe('signatureHandler', () => {
           return {
             name: 'signataires',
             displayName: 'Liste des signataires',
-            type: 'list',
+            type: 'list' as VariableType,
             fields: [
-              { name: 'nom', displayName: 'Nom du signataire', type: 'string' },
-              { name: 'prenom', displayName: 'Prénom', type: 'string' },
-              { name: 'email', displayName: 'Email', type: 'email' },
-              { name: 'fonction', displayName: 'Fonction', type: 'string' },
-              { name: 'signature', displayName: 'Signature', type: 'signature' }
+              { name: 'nom', displayName: 'Nom du signataire', type: 'string' as VariableType },
+              { name: 'prenom', displayName: 'Prénom', type: 'string' as VariableType },
+              { name: 'email', displayName: 'Email', type: 'email' as VariableType },
+              { name: 'fonction', displayName: 'Fonction', type: 'string' as VariableType },
+              { name: 'signature', displayName: 'Signature', type: 'signature' as VariableType }
             ],
           };
         }

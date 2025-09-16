@@ -172,7 +172,56 @@ body {
   font-weight: bold;
   margin: 0 0 6px 0;
 }
-  .page-start { padding-top: 15mm; }
+
+/* Styles pour les zones de signature */
+.ck-signature-zone {
+  display: inline-block;
+  min-width: 120px;
+  min-height: 60px;
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  position: relative;
+  margin: 10px 0;
+  padding: 8px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.ck-signature-zone::before {
+  content: "Signature";
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ck-signature-zone[data-align="center"] {
+  margin: 10px auto;
+  display: block;
+}
+
+.ck-signature-zone[data-align="right"] {
+  float: right;
+  margin: 10px 0 10px 20px;
+}
+
+.ck-signature-zone[data-align="left"] {
+  float: left;
+  margin: 10px 20px 10px 0;
+}
+
+/* Nettoyage des floats */
+.ck-signature-zone[data-align="left"] + *,
+.ck-signature-zone[data-align="right"] + * {
+  clear: both;
+}
+
+.page-start { padding-top: 15mm; }
 </style>`;
 
   return style + '\n' + doc.body.innerHTML;

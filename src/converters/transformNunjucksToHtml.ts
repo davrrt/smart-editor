@@ -89,7 +89,18 @@ html = html.replace(
       const byName = variables.find(v => v.type === 'signature' && v.name === legacyKey);
       // 2) sinon, si une variable signature a options.signerKey === legacyKey
       const byKey = variables.find(v => v.type === 'signature' && (v as any)?.options?.signerKey === legacyKey);
-      name = byName?.name || byKey?.name || '';
+      // 3) recherche par nom de champ dans les listes (ex: "signature" dans "signataires.signature")
+      const byField = variables.find(v => {
+        if (v.type === 'list' && v.fields) {
+          return v.fields.some(field => 
+            field.type === 'signature' && 
+            (field.name === legacyKey || (field as any)?.options?.signerKey === legacyKey)
+          );
+        }
+        return false;
+      });
+      
+      name = byName?.name || byKey?.name || (byField ? `${byField.name}.${legacyKey}` : '');
     }
 
     // Align (nouveau) ou compat ancien

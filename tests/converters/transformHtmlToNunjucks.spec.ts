@@ -43,4 +43,16 @@ describe('transformHtmlToNunjucks', () => {
     const output = transformHtmlToNunjucks(html);
     expect(output.startsWith('<style>')).toBe(true);
   });
+
+  it('inclut les styles CSS pour les zones de signature', () => {
+    const html = `<div class="ck-signature-zone" data-id="sig-1" data-name="user.sign" data-align="center"></div>`;
+    const output = transformHtmlToNunjucks(html);
+    expect(output).toContain('.ck-signature-zone {');
+    expect(output).toContain('border: 2px dashed #ccc;');
+    expect(output).toContain('min-width: 120px;');
+    expect(output).toContain('min-height: 60px;');
+    expect(output).toContain('.ck-signature-zone[data-align="center"]');
+    expect(output).toContain('.ck-signature-zone[data-align="left"]');
+    expect(output).toContain('.ck-signature-zone[data-align="right"]');
+  });
 });

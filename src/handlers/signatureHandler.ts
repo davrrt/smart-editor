@@ -267,11 +267,15 @@ export const signatureHandler = {
     }
 
     try {
+      const nameToUse = isNewFormat ? 
+        (signatureZone as { name: string; type: 'signature'; options?: any }).name : 
+        (signatureZone as any).name || label;
       editorInstance.execute('insertSignatureZone', {
         id,
         label,
         signerKey,
         alignment,
+        name: nameToUse, // Ajouter le nom complet de la variable
         ...(loopRef ? { loopRef } : {}),
       });
     } catch (err) {
