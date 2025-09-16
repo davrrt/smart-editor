@@ -1,3 +1,10 @@
+## [1.2.6](https://github.com/davrrt/smart-editor/compare/v1.2.5...v1.2.6) (2025-09-16)
+
+
+### Bug Fixes
+
+* debug toast ([b5e5180](https://github.com/davrrt/smart-editor/commit/b5e518007987eecad3a7992e5669b0ba183dac7a))
+
 ## [1.2.5](https://github.com/davrrt/smart-editor/compare/v1.2.4...v1.2.5) (2025-09-16)
 
 
