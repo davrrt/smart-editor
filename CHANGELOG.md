@@ -1,3 +1,10 @@
+## [1.2.9](https://github.com/davrrt/smart-editor/compare/v1.2.8...v1.2.9) (2025-09-16)
+
+
+### Bug Fixes
+
+* attribut signature ([b2b7844](https://github.com/davrrt/smart-editor/commit/b2b784431010afd2cf6799f333df5791305cb0c9))
+
 ## [1.2.8](https://github.com/davrrt/smart-editor/compare/v1.2.7...v1.2.8) (2025-09-16)
 
 
