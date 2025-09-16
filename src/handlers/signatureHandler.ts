@@ -130,9 +130,20 @@ export const signatureHandler = {
       const parts = variableSignature.name.split('.');
       const rootVar = parts[0];
       const fieldPath = parts.slice(1);
+      
+      console.log('Debug signatureHandler - Variable lookup:', {
+        variableName: variableSignature.name,
+        parts,
+        rootVar,
+        fieldPath,
+        showToastAvailable: !!showToast,
+        showToastType: typeof showToast
+      });
+      
       const rootDefinition = store.get(rootVar);
       
       if (!rootDefinition) {
+        console.error(`Variable "${rootVar}" non trouvée dans le store`);
         if (showToast && typeof showToast === 'function') {
           showToast({
             type: 'error',
