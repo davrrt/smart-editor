@@ -178,10 +178,12 @@ describe('SelectionApi', () => {
       };
 
       const mockSelection = {
-        getSelectedElement: () => null,
-        getFirstPosition: () => ({ offset: 0 }),
-        getLastPosition: () => ({ offset: 11 }),
-        getRanges: () => [mockRange],
+        getSelectedElement: jest.fn(() => null),
+        getFirstPosition: jest.fn(() => ({ offset: 0 })),
+        getLastPosition: jest.fn(() => ({ offset: 11 })),
+        getRanges: jest.fn(() => [mockRange]),
+        on: jest.fn(),
+        off: jest.fn(),
       };
 
       mockEditor.model.document.selection = mockSelection;
@@ -258,10 +260,15 @@ describe('SelectionApi', () => {
     it('should setup event listeners and call callback', () => {
       const callback = jest.fn();
       const mockSelection = {
+        getSelectedElement: jest.fn(),
+        getFirstPosition: jest.fn(),
+        getLastPosition: jest.fn(),
+        getRanges: jest.fn(),
         on: jest.fn(),
         off: jest.fn(),
       };
       const mockDocument = {
+        selection: mockSelection,
         on: jest.fn(),
         off: jest.fn(),
       };
