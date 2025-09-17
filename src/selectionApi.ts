@@ -139,7 +139,20 @@ export function createSelectionApi(getEditor: () => any) {
     }
 
     // Images
-    if (elementName === 'imageBlock' || elementName === 'imageInline') {
+    if (elementName === 'image' || elementName === 'imageBlock' || elementName === 'imageInline' || 
+        elementName.startsWith('image')) {
+      return {
+        type: 'image',
+        element,
+        data: {
+          imageUrl: element.getAttribute('src'),
+          imageWidth: element.getAttribute('width'),
+        }
+      };
+    }
+
+    // Vérification supplémentaire pour les éléments avec attribut src (fallback)
+    if (element.getAttribute && element.getAttribute('src')) {
       return {
         type: 'image',
         element,

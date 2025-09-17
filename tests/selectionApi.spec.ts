@@ -140,6 +140,27 @@ describe('SelectionApi', () => {
       expect(result.data?.imageWidth).toBe('300px');
     });
 
+    it('should detect image selection from URL insert', () => {
+      const mockElement = {
+        name: 'image',
+        getAttribute: jest.fn((attr) => {
+          if (attr === 'src') return 'https://example.com/uploaded-image.jpg';
+          if (attr === 'width') return '400px';
+          return null;
+        }),
+      };
+
+      mockEditor.model.document.selection.getSelectedElement.mockReturnValue(mockElement);
+      mockEditor.model.document.selection.getFirstPosition.mockReturnValue(null);
+      mockEditor.model.document.selection.getLastPosition.mockReturnValue(null);
+
+      const result = selectionApi.getCurrent();
+
+      expect(result.type).toBe('image');
+      expect(result.data?.imageUrl).toBe('https://example.com/uploaded-image.jpg');
+      expect(result.data?.imageWidth).toBe('400px');
+    });
+
     it('should detect table selection', () => {
       const mockRow1 = { name: 'tableRow', getChildren: () => [
         { name: 'tableCell' },
