@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/davrrt/smart-editor/compare/v1.2.9...v1.3.0) (2025-09-17)
+
+
+### Bug Fixes
+
+* api test ([1983a22](https://github.com/davrrt/smart-editor/commit/1983a22ef4ef4de8e92b97a93839ef833ee67258))
+
+
+### Features
+
+* rajout select api ([46d4091](https://github.com/davrrt/smart-editor/commit/46d4091a61301a5a50d4893b924347304ad301d8))
+
 ## [1.2.9](https://github.com/davrrt/smart-editor/compare/v1.2.8...v1.2.9) (2025-09-16)
 
 
