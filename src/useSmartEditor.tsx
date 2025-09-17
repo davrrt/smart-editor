@@ -6,6 +6,7 @@ import { Condition } from './types/condition';
 import { Loop, LoopInput } from './types/loop';
 import { TemplateContract } from './types/contract';
 import { createStyleApi } from './editorCommands';
+import { createSelectionApi, SelectionType } from './selectionApi';
 import { toSlug } from './types/variable';
 
 export const useSmartEditor = () => {
@@ -14,6 +15,9 @@ export const useSmartEditor = () => {
 
   // STYLE API
   const style = createStyleApi(() => liveEditor.getEditorInstance());
+  
+  // SELECTION API
+  const selection = createSelectionApi(() => liveEditor.getEditorInstance());
 
   // TEMPLATE
   const template = {
@@ -30,6 +34,14 @@ export const useSmartEditor = () => {
     save: (callback: () => void) => liveEditor.template.save(callback),
     onClick: (handler: () => void) => {
       liveEditor.template.onClick(handler);
+    },
+    // SELECTION API intégrée dans template
+    currentSelect: {
+      get: () => selection.getCurrent(),
+      isSelected: (type: SelectionType) => selection.isSelected(type),
+      getData: <T = any>(type: SelectionType) => selection.getData<T>(type),
+      getElement: () => selection.getElement(),
+      watch: (callback: (selectionInfo: any) => void) => selection.watch(callback),
     },
   };
 
