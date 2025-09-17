@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/davrrt/smart-editor/compare/v1.3.0...v1.3.1) (2025-09-17)
+
+
+### Bug Fixes
+
+* image ([13e63b4](https://github.com/davrrt/smart-editor/commit/13e63b48d7d069ce8ee0b93c31a2e18bede9f788))
+
 # [1.3.0](https://github.com/davrrt/smart-editor/compare/v1.2.9...v1.3.0) (2025-09-17)
 
 
