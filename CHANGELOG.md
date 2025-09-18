@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/davrrt/smart-editor/compare/v1.4.1...v1.4.2) (2025-09-18)
+
+
+### Bug Fixes
+
+* editeur ([ab3de29](https://github.com/davrrt/smart-editor/commit/ab3de29d77e8d500669a0f0b811c63183d19576e))
+
 ## [1.4.1](https://github.com/davrrt/smart-editor/compare/v1.4.0...v1.4.1) (2025-09-18)
 
 
