@@ -1,3 +1,10 @@
+## [1.4.6](https://github.com/davrrt/smart-editor/compare/v1.4.5...v1.4.6) (2025-09-18)
+
+
+### Bug Fixes
+
+* erreur init ([9615569](https://github.com/davrrt/smart-editor/commit/961556929765ca535b3821ce96ff45b44301d16c))
+
 ## [1.4.5](https://github.com/davrrt/smart-editor/compare/v1.4.4...v1.4.5) (2025-09-18)
 
 
