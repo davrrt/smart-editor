@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/davrrt/smart-editor/compare/v1.4.0...v1.4.1) (2025-09-18)
+
+
+### Bug Fixes
+
+* ckeditor ([11a8343](https://github.com/davrrt/smart-editor/commit/11a83436c818efc7d68aeb80898ccad3a5e94aec))
+
 # [1.4.0](https://github.com/davrrt/smart-editor/compare/v1.3.4...v1.4.0) (2025-09-18)
 
 
