@@ -1,3 +1,10 @@
+## [1.4.8](https://github.com/davrrt/smart-editor/compare/v1.4.7...v1.4.8) (2025-09-18)
+
+
+### Bug Fixes
+
+* erreur block ([62b9119](https://github.com/davrrt/smart-editor/commit/62b9119186bd7eefaa89e8218c0e11c5de219422))
+
 ## [1.4.7](https://github.com/davrrt/smart-editor/compare/v1.4.6...v1.4.7) (2025-09-18)
 
 
