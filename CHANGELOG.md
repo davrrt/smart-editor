@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/davrrt/smart-editor/compare/v1.4.2...v1.4.3) (2025-09-18)
+
+
+### Bug Fixes
+
+* resize ([beaf27c](https://github.com/davrrt/smart-editor/commit/beaf27ce888507e2a67887f98bcf2144966348d4))
+
 ## [1.4.2](https://github.com/davrrt/smart-editor/compare/v1.4.1...v1.4.2) (2025-09-18)
 
 
