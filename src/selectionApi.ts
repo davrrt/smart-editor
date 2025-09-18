@@ -231,12 +231,17 @@ export function createSelectionApi(getEditor: () => any) {
     let hasItalic = false;
     let hasUnderline = false;
     let hasStrikethrough = false;
+    let selectedElement = null;
 
     // Collecter le contenu texte et les styles
     for (const range of ranges) {
       for (const item of range.getWalker()) {
         if (item.item.is('text')) {
           textContent += item.item.data;
+          // Récupérer l'élément parent du texte sélectionné
+          if (!selectedElement && item.item.parent) {
+            selectedElement = item.item.parent;
+          }
         } else if (item.item.is('element')) {
           // Vérifier les styles sur les éléments
           const element = item.item;
@@ -252,7 +257,22 @@ export function createSelectionApi(getEditor: () => any) {
           if (element.name === 's' || element.name === 'strikethrough') {
             hasStrikethrough = true;
           }
+          // Si c'est un élément de style, on peut aussi le considérer comme l'élément sélectionné
+          if (!selectedElement && (element.name === 'strong' || element.name === 'bold' || 
+              element.name === 'em' || element.name === 'italic' || 
+              element.name === 'u' || element.name === 'underline' || 
+              element.name === 's' || element.name === 'strikethrough')) {
+            selectedElement = element;
+          }
         }
+      }
+    }
+
+    // Si on n'a pas trouvé d'élément, essayer de récupérer le conteneur parent de la sélection
+    if (!selectedElement) {
+      const firstPosition = selection.getFirstPosition();
+      if (firstPosition) {
+        selectedElement = firstPosition.parent;
       }
     }
 
@@ -269,6 +289,7 @@ export function createSelectionApi(getEditor: () => any) {
 
     return {
       type: 'text',
+      element: selectedElement,
       data: {
         textContent: textContent.trim(),
         textLength: textContent.length,

@@ -228,6 +228,98 @@ describe('SelectionApi', () => {
       expect(result.position?.start).toBe(0);
       expect(result.position?.end).toBe(11);
     });
+
+    it('should return element for text selection', () => {
+      const mockParentElement = {
+        name: 'paragraph',
+        getAttribute: jest.fn(),
+      };
+
+      const mockTextNode = {
+        is: jest.fn((type) => type === 'text'),
+        data: 'Hello World',
+        parent: mockParentElement,
+      };
+
+      const mockRange = {
+        getWalker: () => [
+          { item: mockTextNode },
+        ]
+      };
+
+      const mockSelection = {
+        getSelectedElement: jest.fn(() => null),
+        getFirstPosition: jest.fn(() => ({ offset: 0, parent: mockParentElement })),
+        getLastPosition: jest.fn(() => ({ offset: 11 })),
+        getRanges: jest.fn(() => [mockRange]),
+        on: jest.fn(),
+        off: jest.fn(),
+      };
+
+      mockEditor.model.document.selection = mockSelection;
+
+      // Mock commands
+      mockEditor.commands.get.mockImplementation((cmd) => {
+        if (cmd === 'bold') return { value: false };
+        if (cmd === 'italic') return { value: false };
+        if (cmd === 'underline') return { value: false };
+        if (cmd === 'strikethrough') return { value: false };
+        return null;
+      });
+
+      const result = selectionApi.getCurrent();
+
+      expect(result.type).toBe('text');
+      expect(result.element).toBe(mockParentElement);
+      expect(result.data?.textContent).toBe('Hello World');
+    });
+
+    it('should return styled element for text selection with formatting', () => {
+      const mockStyledElement = {
+        name: 'strong',
+        getAttribute: jest.fn(),
+      };
+
+      const mockTextNode = {
+        is: jest.fn((type) => type === 'text'),
+        data: 'Bold text',
+        parent: mockStyledElement,
+      };
+
+      const mockRange = {
+        getWalker: () => [
+          { item: mockTextNode },
+          { item: { is: jest.fn((type) => type === 'element'), name: 'strong' } },
+        ]
+      };
+
+      const mockSelection = {
+        getSelectedElement: jest.fn(() => null),
+        getFirstPosition: jest.fn(() => ({ offset: 0, parent: mockStyledElement })),
+        getLastPosition: jest.fn(() => ({ offset: 9 })),
+        getRanges: jest.fn(() => [mockRange]),
+        on: jest.fn(),
+        off: jest.fn(),
+      };
+
+      mockEditor.model.document.selection = mockSelection;
+
+      // Mock commands
+      mockEditor.commands.get.mockImplementation((cmd) => {
+        if (cmd === 'bold') return { value: true };
+        if (cmd === 'italic') return { value: false };
+        if (cmd === 'underline') return { value: false };
+        if (cmd === 'strikethrough') return { value: false };
+        return null;
+      });
+
+      const result = selectionApi.getCurrent();
+
+      expect(result.type).toBe('text');
+      expect(result.element).toBe(mockStyledElement);
+      expect(result.data?.textContent).toBe('Bold text');
+      expect(result.data?.hasBold).toBe(true);
+    });
   });
 
   describe('isSelected', () => {
@@ -274,6 +366,73 @@ describe('SelectionApi', () => {
 
       const data = selectionApi.getData('loop');
       expect(data).toBeNull();
+    });
+  });
+
+  describe('getElement', () => {
+    it('should return element for variable selection', () => {
+      const mockElement = {
+        name: 'variable',
+        getAttribute: jest.fn(() => 'user.name'),
+      };
+
+      mockEditor.model.document.selection.getSelectedElement.mockReturnValue(mockElement);
+      mockEditor.model.document.selection.getFirstPosition.mockReturnValue(null);
+      mockEditor.model.document.selection.getLastPosition.mockReturnValue(null);
+
+      const element = selectionApi.getElement();
+      expect(element).toBe(mockElement);
+    });
+
+    it('should return element for text selection', () => {
+      const mockParentElement = {
+        name: 'paragraph',
+        getAttribute: jest.fn(),
+      };
+
+      const mockTextNode = {
+        is: jest.fn((type) => type === 'text'),
+        data: 'Hello World',
+        parent: mockParentElement,
+      };
+
+      const mockRange = {
+        getWalker: () => [
+          { item: mockTextNode },
+        ]
+      };
+
+      const mockSelection = {
+        getSelectedElement: jest.fn(() => null),
+        getFirstPosition: jest.fn(() => ({ offset: 0, parent: mockParentElement })),
+        getLastPosition: jest.fn(() => ({ offset: 11 })),
+        getRanges: jest.fn(() => [mockRange]),
+        on: jest.fn(),
+        off: jest.fn(),
+      };
+
+      mockEditor.model.document.selection = mockSelection;
+
+      // Mock commands
+      mockEditor.commands.get.mockImplementation((cmd) => {
+        if (cmd === 'bold') return { value: false };
+        if (cmd === 'italic') return { value: false };
+        if (cmd === 'underline') return { value: false };
+        if (cmd === 'strikethrough') return { value: false };
+        return null;
+      });
+
+      const element = selectionApi.getElement();
+      expect(element).toBe(mockParentElement);
+    });
+
+    it('should return null when no selection', () => {
+      mockEditor.model.document.selection.getSelectedElement.mockReturnValue(null);
+      mockEditor.model.document.selection.getFirstPosition.mockReturnValue(null);
+      mockEditor.model.document.selection.getLastPosition.mockReturnValue(null);
+
+      const element = selectionApi.getElement();
+      expect(element).toBeNull();
     });
   });
 
