@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/davrrt/smart-editor/compare/v1.3.4...v1.4.0) (2025-09-18)
+
+
+### Features
+
+* inline bloc image ([8903ae0](https://github.com/davrrt/smart-editor/commit/8903ae03df3462afccb845ae1b76fb2c5d619da8))
+
 ## [1.3.4](https://github.com/davrrt/smart-editor/compare/v1.3.3...v1.3.4) (2025-09-18)
 
 
