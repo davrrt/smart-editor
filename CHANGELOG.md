@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/davrrt/smart-editor/compare/v1.3.2...v1.3.3) (2025-09-18)
+
+
+### Bug Fixes
+
+* retour element ([8adfa78](https://github.com/davrrt/smart-editor/commit/8adfa7820f27f8626ba6ce78c234abf8ab441efa))
+
 ## [1.3.2](https://github.com/davrrt/smart-editor/compare/v1.3.1...v1.3.2) (2025-09-17)
 
 
