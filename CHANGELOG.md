@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/davrrt/smart-editor/compare/v1.5.2...v1.5.3) (2025-09-23)
+
+
+### Bug Fixes
+
+* resize image ([259b277](https://github.com/davrrt/smart-editor/commit/259b277f8c5aa6e92e9fbf5bce0ed22e3cb98b32))
+
 ## [1.5.2](https://github.com/davrrt/smart-editor/compare/v1.5.1...v1.5.2) (2025-09-23)
 
 
