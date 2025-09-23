@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/davrrt/smart-editor/compare/v1.5.4...v1.6.0) (2025-09-23)
+
+
+### Features
+
+* rajout pagination ([988b3a3](https://github.com/davrrt/smart-editor/commit/988b3a3b3e50a1c4d910aceb90f9b4c219917c07))
+
 ## [1.5.4](https://github.com/davrrt/smart-editor/compare/v1.5.3...v1.5.4) (2025-09-23)
 
 
