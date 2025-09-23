@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/davrrt/smart-editor/compare/v1.5.3...v1.5.4) (2025-09-23)
+
+
+### Bug Fixes
+
+* erreur de nom ([f19f9b8](https://github.com/davrrt/smart-editor/commit/f19f9b8c2971a6d7738b1251ef363da830087126))
+
 ## [1.5.3](https://github.com/davrrt/smart-editor/compare/v1.5.2...v1.5.3) (2025-09-23)
 
 
