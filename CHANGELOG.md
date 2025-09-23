@@ -1,3 +1,15 @@
+# [1.5.0](https://github.com/davrrt/smart-editor/compare/v1.4.8...v1.5.0) (2025-09-23)
+
+
+### Bug Fixes
+
+* erreur de resize tableau ([fa15f8b](https://github.com/davrrt/smart-editor/commit/fa15f8b6b0925a8aa69ffc3178622856abcbcc99))
+
+
+### Features
+
+* rajout zod to contract ([80d7baf](https://github.com/davrrt/smart-editor/commit/80d7baf7d88fc01c88d5867129e6192bc8506086))
+
 ## [1.4.8](https://github.com/davrrt/smart-editor/compare/v1.4.7...v1.4.8) (2025-09-18)
 
 
