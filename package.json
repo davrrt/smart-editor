@@ -22,7 +22,6 @@
     "test": "jest",
     "preversion": "npm run build",
     "postbuild": "cp package.publish.json dist/package.json"
-
   },
   "config": {
     "commitizen": {
@@ -81,7 +80,8 @@
   "dependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zod": "^4.1.9"
   },
   "pnpm": {
     "overrides": {
