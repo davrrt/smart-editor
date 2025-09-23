@@ -1,3 +1,10 @@
+## [1.6.5](https://github.com/davrrt/smart-editor/compare/v1.6.4...v1.6.5) (2025-09-23)
+
+
+### Bug Fixes
+
+* debug pagination ([1470dfd](https://github.com/davrrt/smart-editor/commit/1470dfdbd36454ab38a9077029a89df6c7176fce))
+
 ## [1.6.4](https://github.com/davrrt/smart-editor/compare/v1.6.3...v1.6.4) (2025-09-23)
 
 
