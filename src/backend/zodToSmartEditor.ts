@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Variable, VariableType } from '../types/variable';
+import { Variable, VariableType, toSlug } from '../types/variable';
 import { Condition } from '../types/condition';
 import { Loop } from '../types/loop';
 import { TemplateContract } from '../types/contract';
@@ -61,8 +61,11 @@ export const zodToVariable = (fieldName: string, zodType: z.ZodTypeAny, parentPa
   const type = mapZodToSmartEditorType(zodType);
   const options = extractZodOptions(zodType);
   
+  // Utiliser toSlug pour générer le nom comme dans le CRUD
+  const name = toSlug(zodType.description || fieldName);
+  
   const variable: Variable = {
-    name: fieldName,
+    name,
     displayName: zodType.description || fieldName,
     type,
     options
@@ -110,6 +113,147 @@ export const zodToVariable = (fieldName: string, zodType: z.ZodTypeAny, parentPa
   return variable;
 };
 
+/**
+ * Convertit une variable Zod en Condition
+ * Génère des conditions pour les variables avec des enums ou des champs booléens
+ */
+export const zodToCondition = (variable: Variable): Condition[] => {
+  const conditions: Condition[] = [];
+  
+  // Condition pour les enums
+  if (variable.options?.enum && variable.options.enum.length > 0) {
+    conditions.push({
+      id: `condition_${variable.name}_enum`,
+      label: `Condition pour ${variable.name}`,
+      expression: `${variable.name} === '${variable.options.enum[0]}'`,
+      variablesUsed: [variable.name],
+      type: variable.type
+    });
+  }
+  
+  // Condition pour les booléens
+  if (variable.type === 'boolean') {
+    conditions.push({
+      id: `condition_${variable.name}_boolean`,
+      label: `Condition pour ${variable.name}`,
+      expression: `${variable.name} === true`,
+      variablesUsed: [variable.name],
+      type: variable.type
+    });
+  }
+  
+  // Conditions pour les champs d'objets
+  if (variable.fields) {
+    variable.fields.forEach(field => {
+      // Condition pour les enums dans les objets
+      if (field.options?.enum && field.options.enum.length > 0) {
+        conditions.push({
+          id: `condition_${variable.name}_${field.name}_enum`,
+          label: `Condition pour ${variable.name}.${field.name}`,
+          expression: `${variable.name}.${field.name} === '${field.options.enum[0]}'`,
+          variablesUsed: [variable.name],
+          type: field.type
+        });
+      }
+      
+      // Condition pour les booléens dans les objets
+      if (field.type === 'boolean') {
+        conditions.push({
+          id: `condition_${variable.name}_${field.name}_boolean`,
+          label: `Condition pour ${variable.name}.${field.name}`,
+          expression: `${variable.name}.${field.name} === true`,
+          variablesUsed: [variable.name],
+          type: field.type
+        });
+      }
+    });
+  }
+  
+  return conditions;
+};
+
+/**
+ * Convertit une variable Zod de type list en Loop
+ * Génère des boucles pour les arrays avec leurs champs si c'est un array d'objets
+ */
+export const zodToLoop = (variable: Variable): Loop | null => {
+  // Seulement pour les variables de type list
+  if (variable.type !== 'list') {
+    return null;
+  }
+  
+  // Extraire les champs si c'est un array d'objets
+  let fields: string[] = [];
+  if (variable.fields) {
+    fields = variable.fields.map(f => f.name);
+  }
+  
+  // Générer un alias intelligent (enlever le 's' final si présent)
+  let alias = variable.name;
+  if (alias.endsWith('s') && alias.length > 1) {
+    alias = alias.slice(0, -1);
+  }
+  
+  return {
+    id: `loop_${variable.name}`,
+    label: `Boucle pour ${variable.name}`,
+    source: variable.name,
+    alias,
+    fields
+  };
+};
+
+
+/**
+ * Exception personnalisée pour les erreurs de validation
+ */
+export class ValidationError extends Error {
+  constructor(
+    message: string,
+    public availableVariables: string[] = [],
+    public availableLoops: string[] = []
+  ) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+/**
+ * Valide les conditions en vérifiant que les variables utilisées existent
+ */
+export const validateConditions = (conditions: Condition[], variables: Variable[]): void => {
+  const availableVariables = variables.map(v => v.name);
+  
+  for (const condition of conditions) {
+    for (const variableUsed of condition.variablesUsed) {
+      if (!availableVariables.includes(variableUsed)) {
+        throw new ValidationError(
+          `Variable '${variableUsed}' utilisée dans la condition '${condition.id}' n'existe pas.`,
+          availableVariables
+        );
+      }
+    }
+  }
+};
+
+/**
+ * Valide les loops en vérifiant que les sources sont des variables de type list
+ */
+export const validateLoops = (loops: Loop[], variables: Variable[]): void => {
+  const availableLoops = variables
+    .filter(v => v.type === 'list')
+    .map(v => v.name);
+  
+  for (const loop of loops) {
+    if (!availableLoops.includes(loop.source)) {
+      throw new ValidationError(
+        `Variable '${loop.source}' utilisée dans le loop '${loop.id}' n'est pas de type 'list'.`,
+        [],
+        availableLoops
+      );
+    }
+  }
+};
 
 /**
  * Fonction principale : Génère un TemplateContract depuis un schéma Zod
@@ -118,8 +262,8 @@ export const zodToVariable = (fieldName: string, zodType: z.ZodTypeAny, parentPa
 export const generateTemplateContractFromZod = (
   schema: z.ZodObject<any>,
   options: {
-    generateConditions?: boolean;
-    generateLoops?: boolean;
+    conditions?: Condition[];
+    loops?: Loop[];
   } = {}
 ): TemplateContract => {
   // Créer une instance de SmartEditor
@@ -136,44 +280,18 @@ export const generateTemplateContractFromZod = (
     smartEditor.variable.create(variable);
   });
   
-  // Générer les conditions seulement si activé (par défaut: true pour compatibilité)
-  if (options.generateConditions !== false) {
-    const conditions = variables
-      .filter(v => v.options?.enum && v.options.enum.length > 0)
-      .map(v => ({
-        id: `condition_${v.name}_enum`,
-        label: `Condition pour ${v.name}`,
-        expression: `${v.name} === '${v.options!.enum[0]}'`,
-        variablesUsed: [v.name],
-        type: v.type
-      }));
-    
-    conditions.forEach(condition => {
+  // Valider et ajouter les conditions manuelles si fournies
+  if (options.conditions) {
+    validateConditions(options.conditions, variables);
+    options.conditions.forEach(condition => {
       smartEditor.condition.create(condition);
     });
   }
   
-  // Générer les loops seulement si activé (par défaut: true pour compatibilité)
-  if (options.generateLoops !== false) {
-    const loops = variables
-      .filter(v => v.type === 'list')
-      .map(v => {
-        // Extraire les champs si c'est un array d'objets
-        let fields: string[] = [];
-        if (v.fields) {
-          fields = v.fields.map(f => f.name);
-        }
-        
-        return {
-          id: `loop_${v.name}`,
-          label: `Boucle pour ${v.name}`,
-          source: v.name,
-          alias: v.name.slice(0, -1), // Enlever le 's' final si présent
-          fields
-        };
-      });
-    
-    loops.forEach(loop => {
+  // Valider et ajouter les loops manuels si fournis
+  if (options.loops) {
+    validateLoops(options.loops, variables);
+    options.loops.forEach(loop => {
       smartEditor.loop.create(loop);
     });
   }
