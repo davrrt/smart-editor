@@ -29,6 +29,12 @@ export * from './types/signature';
 export * from './types/contract';
 
 /**
+ * Backend utilities
+ */
+export * from './backend/zodToSmartEditor';
+export * from './backend/signatureScanner';
+
+/**
  * Version information
  */
 export const version = '1.0.0';
