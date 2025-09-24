@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/davrrt/smart-editor/compare/v1.7.0...v1.7.1) (2025-09-24)
+
+
+### Bug Fixes
+
+* signature helper ([2524304](https://github.com/davrrt/smart-editor/commit/2524304ec2b2f2138f4cade3d02012503d11e2ad))
+
 # [1.7.0](https://github.com/davrrt/smart-editor/compare/v1.6.5...v1.7.0) (2025-09-24)
 
 
