@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/davrrt/smart-editor/compare/v1.6.5...v1.7.0) (2025-09-24)
+
+
+### Features
+
+* rajout de condition et loop ([f474d0d](https://github.com/davrrt/smart-editor/commit/f474d0d63270ca528b814664189e415bc875e3e4))
+
 ## [1.6.5](https://github.com/davrrt/smart-editor/compare/v1.6.4...v1.6.5) (2025-09-23)
 
 
