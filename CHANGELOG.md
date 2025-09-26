@@ -1,3 +1,10 @@
+## [1.7.3](https://github.com/davrrt/smart-editor/compare/v1.7.2...v1.7.3) (2025-09-26)
+
+
+### Bug Fixes
+
+* erreur zod ([246e123](https://github.com/davrrt/smart-editor/commit/246e123b6d8ad17019d7c51685500a9b93aa52bf))
+
 ## [1.7.2](https://github.com/davrrt/smart-editor/compare/v1.7.1...v1.7.2) (2025-09-26)
 
 
