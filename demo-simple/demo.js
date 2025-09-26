@@ -1,251 +1,259 @@
 /**
  * DÉMO SIMPLE SMART EDITOR
  * 
- * 2 fonctions essentielles :
+ * Utilise les vraies fonctions du backend :
  * 1. TemplateContractBuilder - Construire des contrats
  * 2. SignatureScanner - Scanner les signatures HTML
  */
 
 const { z } = require('zod');
-const { JSDOM } = require('jsdom');
+const util = require('util');
 
-// ===== 1. TEMPLATE CONTRACT BUILDER =====
+// Import des vraies fonctions du backend (package npm)
+const { TemplateContractBuilder, scanSignaturesInTemplate, getStandardizedSignatures } = require('@davrrt/smart-editor');
 
-class TemplateContractBuilder {
-  constructor() {
-    this.variables = [];
-    this.conditions = [];
-    this.loops = [];
-    this.isSealed = false;
-  }
+console.log('🚀 DÉMO SMART EDITOR - 2 FONCTIONS ESSENTIELLES\n');
 
-  withZodSchema(schema, options = {}) {
-    if (this.isSealed) throw new Error('Contrat scellé');
-    
-    const { namespace } = options;
-    const shape = schema._def.shape();
-    
-    Object.entries(shape).forEach(([fieldName, zodType]) => {
-      const variable = {
-        name: namespace ? `${namespace}_${fieldName}` : fieldName,
-        displayName: zodType.description || fieldName,
-        type: this.mapZodType(zodType),
-        options: this.extractOptions(zodType)
-      };
-      this.variables.push(variable);
-    });
-    
-    return this;
-  }
+// ===== EXEMPLE 1: TEMPLATE CONTRACT BUILDER =====
 
-  addVariables(variables) {
-    if (this.isSealed) throw new Error('Contrat scellé');
-    this.variables.push(...variables);
-    return this;
-  }
+console.log('📋 1. TEMPLATE CONTRACT BUILDER');
+console.log('================================');
 
-  addConditions(conditions) {
-    if (this.isSealed) throw new Error('Contrat scellé');
-    this.conditions.push(...conditions);
-    return this;
-  }
+// Utilisation du vrai TemplateContractBuilder
+const builder = new TemplateContractBuilder();
 
-  build() {
-    this.isSealed = true;
-    return {
-      variables: [...this.variables],
-      conditions: [...this.conditions],
-      loops: [...this.loops]
-    };
-  }
+// ===== VERSION AVEC ZOD SCHEMA =====
+console.log('📋 1.1. VERSION AVEC ZOD SCHEMA');
+console.log('===============================');
 
-  mapZodType(zodType) {
-    if (zodType._def.typeName === 'ZodString') return 'string';
-    if (zodType._def.typeName === 'ZodNumber') return 'number';
-    if (zodType._def.typeName === 'ZodBoolean') return 'boolean';
-    if (zodType._def.typeName === 'ZodDate') return 'date';
-    if (zodType._def.typeName === 'ZodArray') return 'list';
-    if (zodType._def.typeName === 'ZodObject') return 'object';
-    if (zodType._def.typeName === 'ZodEnum') return 'string';
-    return 'string';
-  }
+// Schéma Zod avec descriptions
+const userSchema = z.object({
+  'id': z.string().describe('id'),
+  'username': z.string().describe('username'),
+  'isActive': z.boolean().describe('is_active'),
+  'userRole': z.enum(['admin', 'user', 'guest']).describe('user_role')
+});
 
-  extractOptions(zodType) {
-    const options = {};
-    
-    // Pour les enums, extraire les valeurs
-    if (zodType._def.typeName === 'ZodEnum') {
-      options.enum = zodType._def.values;
+// Test avec debug
+const builderZod = new TemplateContractBuilder();
+console.log('🔍 État avant withZodSchema :');
+console.log('Variables:', builderZod.getState().variables.length);
+console.log('Conditions:', builderZod.getState().conditions.length);
+console.log('Loops:', builderZod.getState().loops.length);
+
+const contractZod = builderZod
+  .withZodSchema(userSchema, { namespace: 'user' })
+  .build();
+
+console.log('✅ Contrat avec Zod Schema :');
+console.log(util.inspect(contractZod, { depth: null, colors: true }));
+
+console.log('🔍 État après withZodSchema :');
+console.log('Variables:', builderZod.getState().variables.length);
+console.log('Conditions:', builderZod.getState().conditions.length);
+console.log('Loops:', builderZod.getState().loops.length);
+
+console.log('\n⚠️  NOTE : withZodSchema ne fonctionne pas actuellement');
+console.log('Utilisez les approches manuelles ci-dessous qui fonctionnent parfaitement !');
+
+// ===== VERSION AVEC VARIABLES MANUELLES =====
+console.log('\n📋 1.2. VERSION AVEC VARIABLES MANUELLES');
+console.log('=======================================');
+
+const contractManual = new TemplateContractBuilder()
+  .addVariables([
+    {
+      name: 'user_name',
+      displayName: 'Nom utilisateur',
+      type: 'string'
+    },
+    {
+      name: 'user_role',
+      displayName: 'Rôle utilisateur',
+      type: 'string'
+    },
+    {
+      name: 'user_email',
+      displayName: 'Email utilisateur',
+      type: 'string'
+    },
+    {
+      name: 'users_list',
+      displayName: 'Liste des utilisateurs',
+      type: 'list'
     }
-    
-    // Pour les arrays, extraire les champs si c'est un array d'objets
-    if (zodType._def.typeName === 'ZodArray') {
-      const elementType = zodType._def.type;
-      if (elementType._def.typeName === 'ZodObject') {
-        options.fields = Object.keys(elementType._def.shape()).map(key => ({
-          name: key,
-          type: this.mapZodType(elementType._def.shape()[key])
-        }));
-      }
+  ])
+  .addConditions([
+    {
+      name: 'condition_admin',
+      displayName: 'Est administrateur',
+      expression: 'user_role === "admin"',
+      variablesUsed: ['user_role']
+    },
+    {
+      name: 'condition_has_email',
+      displayName: 'A un email',
+      expression: 'user_email !== ""',
+      variablesUsed: ['user_email']
     }
-    
-    // Pour les objets, extraire les champs
-    if (zodType._def.typeName === 'ZodObject') {
-      options.fields = Object.keys(zodType._def.shape()).map(key => ({
-        name: key,
-        type: this.mapZodType(zodType._def.shape()[key])
-      }));
+  ])
+  .addLoops([
+    {
+      id: 'loop_users',
+      label: 'Boucle utilisateurs',
+      source: 'users_list',
+      alias: 'user',
+      fields: ['name', 'email']
     }
-    
-    return options;
+  ])
+  .build();
+
+console.log('✅ Contrat avec variables manuelles :');
+console.log(util.inspect(contractManual, { depth: null, colors: true }));
+
+// ===== VERSION LIGNE PAR LIGNE =====
+console.log('\n📋 1.3. VERSION LIGNE PAR LIGNE');
+console.log('===============================');
+console.log('📝 Construction ligne par ligne :');
+
+// 1. Ajouter des variables
+builder.addVariables([
+  {
+    name: 'user_name',
+    displayName: 'Nom utilisateur',
+    type: 'string'
+  },
+  {
+    name: 'user_role',
+    displayName: 'Rôle utilisateur',
+    type: 'string'
+  },
+  {
+    name: 'user_email',
+    displayName: 'Email utilisateur',
+    type: 'string'
   }
+]);
+
+console.log('✅ Variables ajoutées');
+
+// 2. Ajouter une variable de type list
+builder.addVariables([
+  {
+    name: 'users_list',
+    displayName: 'Liste des utilisateurs',
+    type: 'list'
+  }
+]);
+
+console.log('✅ Variable de type list ajoutée');
+
+// 3. Ajouter des conditions
+builder.addConditions([
+  {
+    name: 'condition_admin',
+    displayName: 'Est administrateur',
+    expression: 'user_role === "admin"',
+    variablesUsed: ['user_role']
+  },
+  {
+    name: 'condition_has_email',
+    displayName: 'A un email',
+    expression: 'user_email !== ""',
+    variablesUsed: ['user_email']
+  }
+]);
+
+console.log('✅ Conditions ajoutées');
+
+// 4. Ajouter des loops
+builder.addLoops([
+  {
+    id: 'loop_users',
+    label: 'Boucle utilisateurs',
+    source: 'users_list',
+    alias: 'user',
+    fields: ['name', 'email']
+  }
+]);
+
+console.log('✅ Loops ajoutés');
+
+// 5. Vérifier l'état avant scellage
+console.log('\n📊 État avant scellage :');
+console.log('Variables:', builder.getState().variables.length);
+console.log('Conditions:', builder.getState().conditions.length);
+console.log('Loops:', builder.getState().loops.length);
+console.log('Scellé:', builder.getState().isSealed);
+
+// 6. Construire le contrat final (scellage automatique)
+console.log('\n🔒 Construction du contrat final (scellage automatique)...');
+const contract = builder.build();
+console.log('✅ Contrat construit et scellé automatiquement !');
+
+console.log('✅ Contrat avec variables, conditions et loops :');
+console.log(util.inspect(contract, { depth: null, colors: true }));
+
+// 7. Tester qu'on ne peut plus modifier après scellage
+console.log('\n🔒 Test de scellage :');
+try {
+  builder.addVariables([{ name: 'test', displayName: 'Test', type: 'string' }]);
+  console.log('❌ Erreur : On ne devrait pas pouvoir ajouter après scellage');
+} catch (error) {
+  console.log('✅ Parfait : Impossible de modifier après scellage -', error.message);
 }
 
-function createTemplateContractBuilder() {
-  return new TemplateContractBuilder();
-}
+console.log('\n🎉 Construction ligne par ligne terminée avec scellage !');
 
-// ===== 2. SIGNATURE SCANNER =====
+// ===== EXEMPLE 2: SIGNATURE SCANNER =====
 
-function scanSignaturesInTemplate(templateHtml) {
-  const dom = new JSDOM(templateHtml);
-  const document = dom.window.document;
-  
-  const signatureElements = document.querySelectorAll('.ck-signature-zone');
-  const signatures = [];
-  
-  signatureElements.forEach((element, index) => {
-    const signature = {
-      id: element.getAttribute('data-id') || `signature-${index}`,
-      name: element.getAttribute('data-name') || 'signature',
-      align: element.getAttribute('data-align') || 'center',
-      label: element.getAttribute('data-label') || 'Signature',
-      x: 0.5, // Position par défaut
-      y: 0.5,
-      width: 0.2,
-      height: 0.05
-    };
-    signatures.push(signature);
-  });
-  
-  return {
-    signatures,
-    totalCount: signatures.length,
-    hasSignatures: signatures.length > 0
-  };
-}
+console.log('\n🔍 2. SIGNATURE SCANNER');
+console.log('======================');
 
-// ===== DÉMO =====
-
-function demo() {
-  console.log('🎯 === DÉMO SMART EDITOR SIMPLE ===\n');
-
-  // Schéma Zod d'exemple (comme dans les tests)
-  const userSchema = z.object({
-    id: z.string().uuid().describe('The ID'),
-    name: z.string().describe('The name'),
-    age: z.number().describe('The age'),
-    isActive: z.boolean().describe('Is active'),
-    createdAt: z.string().datetime().describe('Creation date'),
-    status: z.enum(['active', 'inactive', 'pending']).describe('Status'),
-    tags: z.array(z.string()).describe('Tags array'),
-    metadata: z.object({
-      version: z.string(),
-      category: z.string(),
-    }).describe('Metadata object'),
-  });
-
-  // Template HTML d'exemple
-  const templateHtml = `
-    <div class="document">
-      <h1>Contrat</h1>
-      <p>Nom : {{ name }}</p>
-      <p>Email : {{ email }}</p>
-      
-      <div class="signatures">
-        <span class="ck-signature-zone" 
-              data-id="seller-signature" 
-              data-name="seller" 
-              data-align="left" 
-              data-label="Signature vendeur">
-        </span>
-        
-        <span class="ck-signature-zone" 
-              data-id="buyer-signature" 
-              data-name="buyer" 
-              data-align="right" 
-              data-label="Signature acheteur">
-        </span>
-      </div>
+// Template HTML avec signatures
+const templateHtml = `
+<!DOCTYPE html>
+<html>
+<head><title>Template avec signatures</title></head>
+<body>
+  <div class="content">
+    <h1>Document de contrat</h1>
+    <p>Contenu du document...</p>
+    
+    <!-- Zone de signature 1 -->
+    <div class="ck-signature-zone" data-id="signature_1" data-name="client" data-align="left" style="position: absolute; left: 100px; top: 200px; width: 150px; height: 50px; border: 2px dashed #ccc;">
+      Signature Client
     </div>
-  `;
+    
+    <!-- Zone de signature 2 -->
+    <div class="ck-signature-zone" data-id="signature_2" data-name="vendeur" data-align="right" style="position: absolute; left: 400px; top: 200px; width: 150px; height: 50px; border: 2px dashed #ccc;">
+      Signature Vendeur
+    </div>
+    
+    <p>Fin du document</p>
+  </div>
+</body>
+</html>
+`;
 
-  // 1. DÉMO TEMPLATE CONTRACT BUILDER
-  console.log('🚀 === TEMPLATE CONTRACT BUILDER ===\n');
-  
-  const contract = createTemplateContractBuilder()
-    .withZodSchema(userSchema, { namespace: 'user' })
-    .addVariables([
-      { name: 'company_logo', type: 'signature' }
-    ])
-    .addConditions([
-      {
-        id: 'active_condition',
-        label: 'User is active',
-        expression: 'user_isActive === true',
-        variablesUsed: ['user_isActive'],
-        type: 'boolean'
-      }
-    ])
-    .build();
+// Utilisation du vrai SignatureScanner (fonctions, pas classe)
+const signatures = scanSignaturesInTemplate(templateHtml);
 
-  console.log('✅ Contrat généré :');
-  console.log(`   - Variables: ${contract.variables.length}`);
-  console.log(`   - Conditions: ${contract.conditions.length}`);
-  console.log(`   - Boucles: ${contract.loops.length}`);
-  
-  console.log('\n📋 Variables :');
-  contract.variables.forEach(v => {
-    console.log(`   - ${v.name} (${v.type})`);
-  });
+console.log('✅ Signatures détectées :');
+console.log(util.inspect(signatures, { depth: null, colors: true }));
 
-  console.log('\n📄 OBJET CONTRAT COMPLET :');
-  console.log(JSON.stringify(contract, null, 2));
+// ===== EXEMPLE 3: SIGNATURES STANDARDISÉES =====
 
-  // 2. DÉMO SIGNATURE SCANNER
-  console.log('\n🔍 === SIGNATURE SCANNER ===\n');
-  
-  const scanResult = scanSignaturesInTemplate(templateHtml);
-  
-  console.log('✅ Signatures scannées :');
-  console.log(`   - Total: ${scanResult.totalCount}`);
-  console.log(`   - A des signatures: ${scanResult.hasSignatures}`);
-  
-  console.log('\n📋 Signatures trouvées :');
-  scanResult.signatures.forEach(sig => {
-    console.log(`   - ${sig.id} (${sig.align}) - ${sig.label}`);
-  });
+console.log('\n📊 3. SIGNATURES STANDARDISÉES');
+console.log('==============================');
 
-  console.log('\n📄 OBJET SIGNATURES COMPLET :');
-  console.log(JSON.stringify(scanResult, null, 2));
+const standardizedSignatures = getStandardizedSignatures(templateHtml, 800, 600);
 
-  // 3. RÉSUMÉ
-  console.log('\n📊 === RÉSUMÉ ===\n');
-  console.log('✅ TemplateContractBuilder : Fonctionnel');
-  console.log('✅ SignatureScanner : Fonctionnel');
-  console.log('✅ Scellement : Fonctionnel');
-  console.log('✅ Construction progressive : Fonctionnel');
-  
-  console.log('\n🎉 Démo terminée avec succès !');
-}
+console.log('✅ Signatures standardisées :');
+console.log(util.inspect(standardizedSignatures, { depth: null, colors: true }));
 
-// Lancement
-if (require.main === module) {
-  demo();
-}
-
-module.exports = {
-  createTemplateContractBuilder,
-  scanSignaturesInTemplate,
-  demo
-};
+console.log('\n🎉 DÉMO TERMINÉE !');
+console.log('==================');
+console.log('✅ TemplateContractBuilder : Construction de contrats');
+console.log('✅ SignatureScanner : Détection de signatures HTML');
+console.log('✅ Utilisation des vraies fonctions du backend');

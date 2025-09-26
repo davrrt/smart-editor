@@ -8,10 +8,15 @@
     "test": "node demo.js"
   },
   "dependencies": {
-    "zod": "^3.22.0",
-    "jsdom": "^23.0.0"
+    "@davrrt/smart-editor": "^1.7.2",
+    "jsdom": "^23.0.0",
+    "zod": "^3.22.0"
   },
-  "keywords": ["smart-editor", "demo", "simple"],
+  "keywords": [
+    "smart-editor",
+    "demo",
+    "simple"
+  ],
   "author": "SmartEditor Team",
   "license": "MIT"
 }

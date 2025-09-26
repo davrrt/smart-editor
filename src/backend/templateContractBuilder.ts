@@ -254,6 +254,7 @@ export class TemplateContractBuilder {
       const { namespace, customConditions, customLoops, customVariables } = options;
       
       const shape = (schema as any)._def.shape;
+      
       const schemaVariables = Object.entries(shape).map(([fieldName, zodType]) => {
         const variable = zodToVariable(fieldName, zodType as z.ZodTypeAny);
         
