@@ -1,0 +1,122 @@
+{
+  "description": "Exemple de sortie pour SignatureScanner - SignatureScanResult",
+  "output": {
+    "scanSignaturesInTemplate": {
+      "signatures": [
+        {
+          "id": "seller-signature",
+          "name": "seller",
+          "align": "left",
+          "label": "Signature vendeur",
+          "x": 0.5,
+          "y": 0.5,
+          "width": 0.2,
+          "height": 0.05
+        },
+        {
+          "id": "buyer-signature",
+          "name": "buyer",
+          "align": "right",
+          "label": "Signature acheteur",
+          "x": 0.5,
+          "y": 0.5,
+          "width": 0.2,
+          "height": 0.05
+        },
+        {
+          "id": "witness-signature",
+          "name": "witness",
+          "align": "center",
+          "label": "Signature témoin",
+          "x": 0.5,
+          "y": 0.5,
+          "width": 0.2,
+          "height": 0.05
+        }
+      ],
+      "totalCount": 3,
+      "hasSignatures": true
+    },
+    "getStandardizedSignatures": [
+      {
+        "id": "seller-signature",
+        "tabType": "signature",
+        "documentId": "template-document",
+        "recipientId": "default-recipient",
+        "page": 1,
+        "x": 0.5,
+        "y": 0.5,
+        "width": 0.2,
+        "height": 0.05,
+        "anchorString": "Signature vendeur",
+        "anchorXOffset": 0,
+        "anchorYOffset": 0,
+        "anchorIgnoreIfNotPresent": false,
+        "anchorCaseSensitive": true,
+        "anchorMatchWholeWord": true,
+        "required": true,
+        "locked": false,
+        "shared": false,
+        "conditional": false,
+        "validation": null,
+        "style": "default"
+      },
+      {
+        "id": "buyer-signature",
+        "tabType": "signature",
+        "documentId": "template-document",
+        "recipientId": "default-recipient",
+        "page": 1,
+        "x": 0.5,
+        "y": 0.5,
+        "width": 0.2,
+        "height": 0.05,
+        "anchorString": "Signature acheteur",
+        "anchorXOffset": 0,
+        "anchorYOffset": 0,
+        "anchorIgnoreIfNotPresent": false,
+        "anchorCaseSensitive": true,
+        "anchorMatchWholeWord": true,
+        "required": true,
+        "locked": false,
+        "shared": false,
+        "conditional": false,
+        "validation": null,
+        "style": "default"
+      },
+      {
+        "id": "witness-signature",
+        "tabType": "signature",
+        "documentId": "template-document",
+        "recipientId": "default-recipient",
+        "page": 1,
+        "x": 0.5,
+        "y": 0.5,
+        "width": 0.2,
+        "height": 0.05,
+        "anchorString": "Signature témoin",
+        "anchorXOffset": 0,
+        "anchorYOffset": 0,
+        "anchorIgnoreIfNotPresent": false,
+        "anchorCaseSensitive": true,
+        "anchorMatchWholeWord": true,
+        "required": true,
+        "locked": false,
+        "shared": false,
+        "conditional": false,
+        "validation": null,
+        "style": "default"
+      }
+    ]
+  },
+  "metadata": {
+    "totalSignatures": 3,
+    "hasSignatures": true,
+    "alignments": {
+      "left": 1,
+      "center": 1,
+      "right": 1
+    },
+    "standardizedFormat": "DocuSign compatible"
+  }
+}

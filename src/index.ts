@@ -29,9 +29,9 @@ export * from './types/signature';
 export * from './types/contract';
 
 /**
- * Backend utilities
+ * Backend utilities - 2 helpers essentiels
  */
-export * from './backend/zodToSmartEditor';
+export * from './backend/templateContractBuilder';
 export * from './backend/signatureScanner';
 
 /**

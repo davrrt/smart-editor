@@ -1,0 +1,17 @@
+{
+  "name": "smart-editor-demo-simple",
+  "version": "1.0.0",
+  "description": "Démo simple SmartEditor - 2 fonctions essentielles",
+  "main": "demo.js",
+  "scripts": {
+    "start": "node demo.js",
+    "test": "node demo.js"
+  },
+  "dependencies": {
+    "zod": "^3.22.0",
+    "jsdom": "^23.0.0"
+  },
+  "keywords": ["smart-editor", "demo", "simple"],
+  "author": "SmartEditor Team",
+  "license": "MIT"
+}

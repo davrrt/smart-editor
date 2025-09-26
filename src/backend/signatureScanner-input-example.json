@@ -1,0 +1,21 @@
+{
+  "description": "Exemple d'entrée pour SignatureScanner - Template HTML",
+  "input": {
+    "templateHtml": "<div class=\"ck\">\n  <h1>Contrat de vente</h1>\n  \n  <div class=\"ck-signature-zone\" \n       data-id=\"seller-signature\" \n       data-name=\"seller\" \n       data-align=\"left\"\n       data-label=\"Signature vendeur\">\n  </div>\n  \n  <div class=\"ck-signature-zone\" \n       data-id=\"buyer-signature\" \n       data-name=\"buyer\" \n       data-align=\"right\"\n       data-label=\"Signature acheteur\">\n  </div>\n  \n  <div class=\"ck-signature-zone\" \n       data-id=\"witness-signature\" \n       data-name=\"witness\" \n       data-align=\"center\"\n       data-label=\"Signature témoin\">\n  </div>\n</div>",
+    "documentWidth": 595,
+    "documentHeight": 842
+  },
+  "usage": {
+    "scanSignatures": "const result = scanSignaturesInTemplate(templateHtml);",
+    "getStandardizedSignatures": "const signatures = getStandardizedSignatures(templateHtml, documentWidth, documentHeight);"
+  },
+  "expectedElements": {
+    "signatureZones": [
+      {
+        "selector": ".ck-signature-zone",
+        "requiredAttributes": ["data-id"],
+        "optionalAttributes": ["data-name", "data-align", "data-label"]
+      }
+    ]
+  }
+}

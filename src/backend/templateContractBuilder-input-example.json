@@ -1,0 +1,77 @@
+{
+  "description": "Exemple d'entrée pour TemplateContractBuilder - Schéma Zod",
+  "input": {
+    "schema": {
+      "type": "ZodObject",
+      "shape": {
+        "id": {
+          "type": "ZodString",
+          "description": "The ID",
+          "validation": "uuid"
+        },
+        "name": {
+          "type": "ZodString", 
+          "description": "The name"
+        },
+        "age": {
+          "type": "ZodNumber",
+          "description": "The age"
+        },
+        "isActive": {
+          "type": "ZodBoolean",
+          "description": "Is active"
+        },
+        "createdAt": {
+          "type": "ZodString",
+          "description": "Creation date",
+          "validation": "datetime"
+        },
+        "status": {
+          "type": "ZodEnum",
+          "description": "Status",
+          "values": ["active", "inactive", "pending"]
+        },
+        "tags": {
+          "type": "ZodArray",
+          "description": "Tags array",
+          "elementType": "ZodString"
+        },
+        "metadata": {
+          "type": "ZodObject",
+          "description": "Metadata object",
+          "shape": {
+            "version": {
+              "type": "ZodString"
+            },
+            "category": {
+              "type": "ZodString"
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "namespace": "user",
+      "customVariables": [
+        {
+          "name": "company_logo",
+          "type": "signature",
+          "displayName": "Logo de l'entreprise"
+        }
+      ],
+      "customConditions": [
+        {
+          "id": "active_condition",
+          "label": "User is active",
+          "expression": "user_isActive === true",
+          "variablesUsed": ["user_isActive"],
+          "type": "boolean"
+        }
+      ],
+      "customLoops": []
+    }
+  },
+  "usage": {
+    "code": "const builder = createTemplateContractBuilder();\nconst contract = builder\n  .withZodSchema(userSchema, {\n    namespace: 'user',\n    customVariables: [/* ... */],\n    customConditions: [/* ... */]\n  })\n  .build();"
+  }
+}

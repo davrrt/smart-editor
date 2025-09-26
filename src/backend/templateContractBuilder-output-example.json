@@ -1,0 +1,114 @@
+{
+  "description": "Exemple de sortie pour TemplateContractBuilder - TemplateContract",
+  "output": {
+    "variables": [
+      {
+        "name": "user_id",
+        "displayName": "user - The ID",
+        "type": "string",
+        "options": {}
+      },
+      {
+        "name": "user_name",
+        "displayName": "user - The name",
+        "type": "string",
+        "options": {}
+      },
+      {
+        "name": "user_age",
+        "displayName": "user - The age",
+        "type": "number",
+        "options": {}
+      },
+      {
+        "name": "user_isActive",
+        "displayName": "user - Is active",
+        "type": "boolean",
+        "options": {}
+      },
+      {
+        "name": "user_createdAt",
+        "displayName": "user - Creation date",
+        "type": "date",
+        "options": {}
+      },
+      {
+        "name": "user_status",
+        "displayName": "user - Status",
+        "type": "string",
+        "options": {
+          "enum": ["active", "inactive", "pending"]
+        }
+      },
+      {
+        "name": "user_tags",
+        "displayName": "user - Tags array",
+        "type": "list",
+        "options": {}
+      },
+      {
+        "name": "user_metadata",
+        "displayName": "user - Metadata object",
+        "type": "object",
+        "options": {
+          "fields": [
+            {
+              "name": "version",
+              "type": "string",
+              "options": {}
+            },
+            {
+              "name": "category",
+              "type": "string",
+              "options": {}
+            }
+          ]
+        }
+      },
+      {
+        "name": "company_logo",
+        "type": "signature",
+        "displayName": "Logo de l'entreprise"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "condition_user_status_enum",
+        "label": "Condition pour user_status",
+        "expression": "user_status === 'active'",
+        "variablesUsed": ["user_status"],
+        "type": "string"
+      },
+      {
+        "id": "condition_user_isActive_boolean",
+        "label": "Condition pour user_isActive",
+        "expression": "user_isActive === true",
+        "variablesUsed": ["user_isActive"],
+        "type": "boolean"
+      },
+      {
+        "id": "active_condition",
+        "label": "User is active",
+        "expression": "user_isActive === true",
+        "variablesUsed": ["user_isActive"],
+        "type": "boolean"
+      }
+    ],
+    "loops": [
+      {
+        "id": "loop_user_tags",
+        "label": "Boucle pour user_tags",
+        "source": "user_tags",
+        "alias": "user_tag",
+        "fields": []
+      }
+    ]
+  },
+  "metadata": {
+    "totalVariables": 9,
+    "totalConditions": 3,
+    "totalLoops": 1,
+    "isSealed": true,
+    "validationStatus": "valid"
+  }
+}
