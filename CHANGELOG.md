@@ -1,3 +1,10 @@
+## [1.7.4](https://github.com/davrrt/smart-editor/compare/v1.7.3...v1.7.4) (2025-09-26)
+
+
+### Bug Fixes
+
+* correctif demo ([ada6c10](https://github.com/davrrt/smart-editor/commit/ada6c10f8d23fd077164667414b3c413ed42082c))
+
 ## [1.7.3](https://github.com/davrrt/smart-editor/compare/v1.7.2...v1.7.3) (2025-09-26)
 
 
