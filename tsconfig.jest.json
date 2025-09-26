@@ -1,11 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "isolatedModules": true,
     "types": ["jest"],
-
-    // ⬇️ Ajoute ceci
     "baseUrl": ".",
     "paths": {
       "src/*": ["src/*"]

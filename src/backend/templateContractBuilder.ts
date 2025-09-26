@@ -5,8 +5,8 @@ import { Loop } from '../types/loop';
 import { TemplateContract } from '../types/contract';
 
 /**
- * Template Contract Builder - Helper pour construire des contrats depuis des schémas Zod
- * Version simplifiée et essentielle
+ * Template Contract Builder - Version simplifiée
+ * Objectif : Zod → addVariable → JSON schema
  */
 
 // ===== UTILITAIRES =====
@@ -127,118 +127,16 @@ const zodToVariable = (fieldName: string, zodType: z.ZodTypeAny, parentPath: str
   return variable;
 };
 
-const zodToCondition = (variable: Variable): Condition[] => {
-  const conditions: Condition[] = [];
-  
-  if (variable.options?.enum && variable.options.enum.length > 0) {
-    conditions.push({
-      id: `condition_${variable.name}_enum`,
-      label: `Condition pour ${variable.name}`,
-      expression: `${variable.name} === '${variable.options.enum[0]}'`,
-      variablesUsed: [variable.name],
-      type: variable.type
-    });
-  }
-  
-  if (variable.type === 'boolean') {
-    conditions.push({
-      id: `condition_${variable.name}_boolean`,
-      label: `Condition pour ${variable.name}`,
-      expression: `${variable.name} === true`,
-      variablesUsed: [variable.name],
-      type: variable.type
-    });
-  }
-  
-  if (variable.fields) {
-    variable.fields.forEach(field => {
-      if (field.options?.enum && field.options.enum.length > 0) {
-        conditions.push({
-          id: `condition_${variable.name}_${field.name}_enum`,
-          label: `Condition pour ${variable.name}.${field.name}`,
-          expression: `${variable.name}.${field.name} === '${field.options.enum[0]}'`,
-          variablesUsed: [variable.name],
-          type: field.type
-        });
-      }
-      
-      if (field.type === 'boolean') {
-        conditions.push({
-          id: `condition_${variable.name}_${field.name}_boolean`,
-          label: `Condition pour ${variable.name}.${field.name}`,
-          expression: `${variable.name}.${field.name} === true`,
-          variablesUsed: [variable.name],
-          type: field.type
-        });
-      }
-    });
-  }
-  
-  return conditions;
-};
-
-const zodToLoop = (variable: Variable): Loop | null => {
-  if (variable.type !== 'list') {
-    return null;
-  }
-  
-  let fields: string[] = [];
-  if (variable.fields) {
-    fields = variable.fields.map(f => f.name);
-  }
-  
-  let alias = variable.name;
-  if (alias.endsWith('s') && alias.length > 1) {
-    alias = alias.slice(0, -1);
-  }
-  
-  return {
-    id: `loop_${variable.name}`,
-    label: `Boucle pour ${variable.name}`,
-    source: variable.name,
-    alias,
-    fields
-  };
-};
-
-const validateConditions = (conditions: Condition[], variables: Variable[]): void => {
-  const availableVariables = variables.map(v => v.name);
-  
-  for (const condition of conditions) {
-    for (const variableUsed of condition.variablesUsed) {
-      if (!availableVariables.includes(variableUsed)) {
-        throw new Error(`Variable '${variableUsed}' utilisée dans la condition '${condition.id}' n'existe pas.`);
-      }
-    }
-  }
-};
-
-const validateLoops = (loops: Loop[], variables: Variable[]): void => {
-  const availableLoops = variables
-    .filter(v => v.type === 'list')
-    .map(v => v.name);
-  
-  for (const loop of loops) {
-    if (!availableLoops.includes(loop.source)) {
-      throw new Error(`Variable '${loop.source}' utilisée dans le loop '${loop.id}' n'est pas de type 'list'.`);
-    }
-  }
-};
-
-// ===== TEMPLATE CONTRACT BUILDER =====
+// ===== TEMPLATE CONTRACT BUILDER SIMPLIFIÉ =====
 
 export interface ZodSchemaOptions {
   namespace?: string;
-  customConditions?: Condition[];
-  customLoops?: Loop[];
-  customVariables?: Variable[];
 }
 
 export class TemplateContractBuilder {
   private variables: Variable[] = [];
   private conditions: Condition[] = [];
   private loops: Loop[] = [];
-  private validationErrors: string[] = [];
   private isSealed: boolean = false;
 
   private checkSealed(): void {
@@ -247,17 +145,21 @@ export class TemplateContractBuilder {
     }
   }
 
+  /**
+   * Ajoute un schéma Zod et convertit ses champs en variables
+   */
   withZodSchema(schema: z.ZodObject<any>, options: ZodSchemaOptions = {}): this {
     this.checkSealed();
     
     try {
-      const { namespace, customConditions, customLoops, customVariables } = options;
+      const { namespace } = options;
       
+      // Extraire les variables du schéma Zod
       const shape = (schema as any)._def.shape;
-      
       const schemaVariables = Object.entries(shape).map(([fieldName, zodType]) => {
         const variable = zodToVariable(fieldName, zodType as z.ZodTypeAny);
         
+        // Appliquer le namespace si fourni
         if (namespace) {
           variable.name = `${namespace}_${variable.name}`;
           if (variable.displayName) {
@@ -268,97 +170,56 @@ export class TemplateContractBuilder {
         return variable;
       });
 
-      if (customVariables) {
-        schemaVariables.push(...customVariables);
-      }
-
-      const autoConditions: Condition[] = [];
-      schemaVariables.forEach(variable => {
-        const variableConditions = zodToCondition(variable);
-        autoConditions.push(...variableConditions);
-      });
-
-      if (customConditions) {
-        autoConditions.push(...customConditions);
-      }
-
-      const autoLoops: Loop[] = [];
-      schemaVariables.forEach(variable => {
-        const loop = zodToLoop(variable);
-        if (loop) {
-          autoLoops.push(loop);
-        }
-      });
-
-      if (customLoops) {
-        autoLoops.push(...customLoops);
-      }
-
-      try {
-        validateConditions(autoConditions, schemaVariables);
-        validateLoops(autoLoops, schemaVariables);
-      } catch (error) {
-        this.validationErrors.push(`Erreur de validation pour le schéma ${namespace || 'sans namespace'}: ${error.message}`);
-        return this;
-      }
-
+      // Ajouter les variables
       this.variables.push(...schemaVariables);
-      this.conditions.push(...autoConditions);
-      this.loops.push(...autoLoops);
 
     } catch (error) {
-      this.validationErrors.push(`Erreur lors de l'ajout du schéma: ${error.message}`);
+      throw new Error(`Erreur lors de l'ajout du schéma: ${error.message}`);
     }
 
     return this;
   }
 
+  /**
+   * Ajoute des variables manuellement (compatible avec l'API SmartEditor)
+   */
+  addVariable(variable: Variable): this {
+    this.checkSealed();
+    this.variables.push(variable);
+    return this;
+  }
+
+  /**
+   * Ajoute plusieurs variables
+   */
   addVariables(variables: Variable[]): this {
     this.checkSealed();
     this.variables.push(...variables);
     return this;
   }
 
+  /**
+   * Ajoute des conditions manuellement
+   */
   addConditions(conditions: Condition[]): this {
     this.checkSealed();
     this.conditions.push(...conditions);
     return this;
   }
 
+  /**
+   * Ajoute des loops manuellement
+   */
   addLoops(loops: Loop[]): this {
     this.checkSealed();
     this.loops.push(...loops);
     return this;
   }
 
-  validate(): { isValid: boolean; errors: string[] } {
-    const errors = [...this.validationErrors];
-
-    try {
-      validateConditions(this.conditions, this.variables);
-    } catch (error) {
-      errors.push(`Erreur de validation des conditions: ${error.message}`);
-    }
-
-    try {
-      validateLoops(this.loops, this.variables);
-    } catch (error) {
-      errors.push(`Erreur de validation des boucles: ${error.message}`);
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  }
-
+  /**
+   * Construit le contrat final et le scelle
+   */
   build(): TemplateContract {
-    const validation = this.validate();
-    
-    if (!validation.isValid) {
-      throw new Error(`Erreurs de validation: ${validation.errors.join(', ')}`);
-    }
-
     this.isSealed = true;
 
     return {
@@ -368,18 +229,70 @@ export class TemplateContractBuilder {
     };
   }
 
+  /**
+   * Génère un schéma JSON à partir des variables
+   */
+  toJsonSchema(): any {
+    const properties: Record<string, any> = {};
+    const required: string[] = [];
+
+    this.variables.forEach(variable => {
+      const property: any = {
+        type: this.mapVariableTypeToJsonSchema(variable.type),
+        description: variable.displayName
+      };
+
+      // Ajouter les options spécifiques
+      if (variable.options?.enum) {
+        property.enum = variable.options.enum;
+      }
+
+      if (variable.fields) {
+        property.properties = {};
+        variable.fields.forEach(field => {
+          property.properties[field.name] = {
+            type: this.mapVariableTypeToJsonSchema(field.type),
+            description: field.name
+          };
+        });
+      }
+
+      properties[variable.name] = property;
+      required.push(variable.name);
+    });
+
+    return {
+      type: 'object',
+      properties,
+      required
+    };
+  }
+
+  private mapVariableTypeToJsonSchema(type: VariableType): string {
+    switch (type) {
+      case 'string': return 'string';
+      case 'number': return 'number';
+      case 'boolean': return 'boolean';
+      case 'date': return 'string'; // JSON Schema ne supporte pas nativement les dates
+      case 'list': return 'array';
+      case 'object': return 'object';
+      default: return 'string';
+    }
+  }
+
+  /**
+   * Retourne l'état actuel du builder
+   */
   getState(): {
     variables: Variable[];
     conditions: Condition[];
     loops: Loop[];
-    errors: string[];
     isSealed: boolean;
   } {
     return {
       variables: [...this.variables],
       conditions: [...this.conditions],
       loops: [...this.loops],
-      errors: [...this.validationErrors],
       isSealed: this.isSealed
     };
   }
