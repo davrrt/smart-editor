@@ -1,3 +1,10 @@
+## [1.7.6](https://github.com/davrrt/smart-editor/compare/v1.7.5...v1.7.6) (2025-09-29)
+
+
+### Bug Fixes
+
+* bouton plugin ([2a9bbe0](https://github.com/davrrt/smart-editor/commit/2a9bbe0a17b0d5c679f75752c0ab9b1231b7f1e9))
+
 ## [1.7.5](https://github.com/davrrt/smart-editor/compare/v1.7.4...v1.7.5) (2025-09-29)
 
 
