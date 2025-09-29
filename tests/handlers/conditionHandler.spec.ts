@@ -42,6 +42,7 @@ describe('conditionHandler', () => {
       id: 'cond-1',
       label: 'Condition 1',
       mode: 'insert',
+      titleHtmlTemplate: 'Condition 1',
     });
   });
 
