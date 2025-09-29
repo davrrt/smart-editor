@@ -20,6 +20,7 @@ export const conditionHandler = {
       expression: condition.expression,
       id:condition.id,
       label: condition.label,
+      titleHtmlTemplate: condition.label,
       mode: 'insert',
     });
   },
