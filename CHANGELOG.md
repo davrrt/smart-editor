@@ -1,3 +1,11 @@
+## [1.7.5](https://github.com/davrrt/smart-editor/compare/v1.7.4...v1.7.5) (2025-09-29)
+
+
+### Bug Fixes
+
+* debug title ([bec0ee0](https://github.com/davrrt/smart-editor/commit/bec0ee00e4d9d3c9d1526c74c9d757f499f81480))
+* jest error ([8f1840f](https://github.com/davrrt/smart-editor/commit/8f1840f0e2977ff60a81445af1ca7a187e31214e))
+
 ## [1.7.4](https://github.com/davrrt/smart-editor/compare/v1.7.3...v1.7.4) (2025-09-26)
 
 
