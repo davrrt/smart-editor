@@ -44,6 +44,7 @@ export const loopHandler = {
       item: loop.alias,
       collection: loop.source,
       id: loop.id,
+      titleHtmlTemplate: loop.label,
     });
   },
 };

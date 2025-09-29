@@ -43,6 +43,7 @@ describe('loopHandler', () => {
       item: 'item',
       collection: 'items',
       id: 'loop-1',
+      titleHtmlTemplate: 'Loop over items'
     });
   });
 
@@ -53,6 +54,7 @@ describe('loopHandler', () => {
       item: 'item',
       collection: 'items',
       id: 'loop-1',
+       titleHtmlTemplate: 'Loop over items'
     });
   });
 
