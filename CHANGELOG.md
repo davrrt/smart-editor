@@ -1,3 +1,10 @@
+## [1.8.6](https://github.com/davrrt/smart-editor/compare/v1.8.5...v1.8.6) (2025-09-30)
+
+
+### Bug Fixes
+
+* debug resize table ([68094cc](https://github.com/davrrt/smart-editor/commit/68094cc34c5d0a39b3923fbbadc479fb9c847a39))
+
 ## [1.8.5](https://github.com/davrrt/smart-editor/compare/v1.8.4...v1.8.5) (2025-09-30)
 
 
