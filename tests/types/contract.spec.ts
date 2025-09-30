@@ -25,13 +25,16 @@ describe('TemplateContract', () => {
         fields: ['name', 'price'],
       },
     ],
-    signatureZones: [
+    dynamicTables: [
       {
-        id: 'sig1',
-        signerKey: 'signerA',
-        label: 'Signature A',
-        align: 'left',
-        signerName: 'Client',
+        id: 'table1',
+        listName: 'users',
+        itemName: 'user',
+        label: 'Tableau des utilisateurs',
+        columns: [
+          { name: 'nom', label: 'Nom' },
+          { name: 'email', label: 'Email' },
+        ],
       },
     ],
   };
@@ -40,7 +43,7 @@ describe('TemplateContract', () => {
     expect(contract.variables).toHaveLength(2);
     expect(contract.conditions[0].expression).toBe('age > 18');
     expect(contract.loops[0].alias).toBe('item');
-    expect(contract.signatureZones[0].signerName).toBe('Client');
+    expect(contract.dynamicTables?.[0].listName).toBe('users');
   });
 
   it('peut être vidé', () => {
@@ -48,13 +51,13 @@ describe('TemplateContract', () => {
       variables: [],
       conditions: [],
       loops: [],
-      signatureZones: [],
+      dynamicTables: [],
     };
 
     expect(empty.variables).toEqual([]);
     expect(empty.conditions).toEqual([]);
     expect(empty.loops).toEqual([]);
-    expect(empty.signatureZones).toEqual([]);
+    expect(empty.dynamicTables).toEqual([]);
   });
 
   it('garde la cohérence des types', () => {

@@ -7,10 +7,12 @@ import { variableHandler } from './handlers/variableHandler';
 import { loopHandler } from './handlers/loopHandler';
 import { conditionHandler } from './handlers/conditionHandler';
 import { signatureHandler } from './handlers/signatureHandler';
+import { dynamicTableHandler } from './handlers/dynamicTableHandler';
 
 import { Variable } from './types/variable';
 import { LoopInput } from './types/loop';
 import { Condition } from './types/condition';
+import { DynamicTableInput } from './types/dynamicTable';
 import { TemplateContract } from './types/contract';
 // ⬇️ CHANGEMENT: SignatureZone (éditeur) garde un id, un name (variable), etc.
 import { SignatureZone } from './types/signature';
@@ -123,7 +125,9 @@ export const useLiveEditor = () => {
           nunjucksTemplate,
           contract.conditions,
           contract.loops,
-          contract.variables
+          contract.variables,
+          new Set(),
+          contract.dynamicTables
         );
         await editorRef.current?.setData(html);
 
@@ -216,7 +220,7 @@ export const useLiveEditor = () => {
     },
 
     signature: {
-      // ⬇️ CHANGEMENT: SignatureZone provient d’une variable { type:'signature', name, options? }
+      // ⬇️ CHANGEMENT: SignatureZone provient d'une variable { type:'signature', name, options? }
       insert: (s: SignatureZone,store: any, visual?: any, showToast?: any) =>
         signatureHandler.insert({ signatureZone: s, visual, showToast, editorInstance: editorRef.current,store }),
       rewrite: (s: SignatureZone, visual?: any, showToast?: any, store?: any) =>
@@ -234,6 +238,20 @@ export const useLiveEditor = () => {
             signatureId,
             signatureKey: variableName || signatureId
           });
+        });
+      }
+    },
+
+    dynamicTable: {
+      insert: (t: DynamicTableInput) => dynamicTableHandler.insert({ table: t, editorInstance: editorRef.current }),
+      rewrite: (t: DynamicTableInput) => dynamicTableHandler.rewrite({ table: t, editorInstance: editorRef.current }),
+      remove: (id: string) => dynamicTableHandler.remove({ id, editorInstance: editorRef.current }),
+      onClick: (handler: (e: { type: 'dynamicTable'; tableId: string }) => void) => {
+        editorRef.current?.editing.view.document.on('click', (_evt: any, domEvt: any) => {
+          const target = domEvt.domTarget as HTMLElement;
+          const tableEl = target.closest('table[data-nunjucks-for]') as HTMLElement | null;
+          const tableId = tableEl?.getAttribute('data-id');
+          if (tableId) return handler({ type: 'dynamicTable', tableId });
         });
       }
     },

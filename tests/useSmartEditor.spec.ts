@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useSmartEditor, Variable, Condition, Loop } from 'src';
+import { useSmartEditor, Variable, Condition, Loop, DynamicTable } from 'src';
 
 describe('useSmartEditor', () => {
   it('ajoute une variable', () => {
@@ -92,6 +92,26 @@ describe('useSmartEditor', () => {
     expect(result.current.variable.getAll()).toHaveLength(1);
   });
 
+  it('ajoute un tableau dynamique', () => {
+    const { result } = renderHook(() => useSmartEditor());
+
+    const dynamicTable: DynamicTable = {
+      id: 'table1',
+      label: 'Tableau des utilisateurs',
+      listName: 'users',
+      itemName: 'user',
+      columns: [
+        { name: 'nom', label: 'Nom' },
+        { name: 'email', label: 'Email' },
+      ],
+    };
+
+    act(() => result.current.dynamicTable.create(dynamicTable));
+
+    expect(result.current.dynamicTable.get('table1')).toEqual(dynamicTable);
+    expect(result.current.dynamicTable.getAll()).toHaveLength(1);
+  });
+
   it('réinitialise tout via _templateStore.clear()', () => {
     const { result } = renderHook(() => useSmartEditor());
 
@@ -104,11 +124,19 @@ describe('useSmartEditor', () => {
         type: 'number',
         variablesUsed: [],
       });
+      result.current.dynamicTable.create({
+        id: 't1',
+        label: 'Test',
+        listName: 'list',
+        itemName: 'item',
+        columns: [],
+      });
       result.current._templateStore.clear();
     });
 
     expect(result.current.variable.getAll()).toEqual([]);
     expect(result.current.condition.getAll()).toEqual([]);
     expect(result.current.loop.getAll()).toEqual([]);
+    expect(result.current.dynamicTable.getAll()).toEqual([]);
   });
 });

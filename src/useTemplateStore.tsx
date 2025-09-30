@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Condition, conditionCRUD } from "./types/condition";
 import { Loop, loopCRUD, LoopInput } from "./types/loop";
 import { Variable, variableCRUD } from "./types/variable";
+import { DynamicTable, dynamicTableCRUD, DynamicTableInput } from "./types/dynamicTable";
 import { TemplateContract } from "./types/contract";
 
 // Helpers signatures dans variables
@@ -14,8 +15,8 @@ export const useTemplateStore = () => {
   const [contract, _setContract] = useState<TemplateContract>({
     variables: [],
     conditions: [],
-    loops: []
-    // ⬇️ CHANGEMENT: plus de signatureZones
+    loops: [],
+    dynamicTables: []
   });
 
   const contractRef = useRef<TemplateContract>(contract);
@@ -100,6 +101,24 @@ export const useTemplateStore = () => {
     all: () => contractRef.current.loops,
   };
 
+  // --- DYNAMIC TABLES ---
+  const setDynamicTables = (newTables: DynamicTable[]) => {
+    setContractSafe({ ...contractRef.current, dynamicTables: newTables });
+    notify();
+  };
+
+  const dynamicTable = {
+    create: (t: DynamicTableInput | DynamicTable) =>
+      setDynamicTables(dynamicTableCRUD.create(contractRef.current.dynamicTables || [], t)),
+    update: (t: DynamicTableInput | DynamicTable) =>
+      setDynamicTables(dynamicTableCRUD.update(contractRef.current.dynamicTables || [], t)),
+    delete: (id: string) =>
+      setDynamicTables(dynamicTableCRUD.delete(contractRef.current.dynamicTables || [], id)),
+    get: (id: string) =>
+      (contractRef.current.dynamicTables || []).find((t) => t.id === id),
+    all: () => contractRef.current.dynamicTables || [],
+  };
+
   // --- SIGNATURES DANS VARIABLES ---
   const setSignatureVars = (vars: Variable[]) => {
     setVariables(vars);
@@ -143,7 +162,8 @@ export const useTemplateStore = () => {
     const cleared = {
       variables: [],
       conditions: [],
-      loops: []
+      loops: [],
+      dynamicTables: []
     };
     setContractSafe(cleared);
     notify();
@@ -155,7 +175,8 @@ export const useTemplateStore = () => {
     setContractSafe({
       variables: newContract.variables ?? [],
       conditions: newContract.conditions ?? [],
-      loops: newContract.loops ?? []
+      loops: newContract.loops ?? [],
+      dynamicTables: newContract.dynamicTables ?? []
     });
     notify();
   };
@@ -165,6 +186,7 @@ export const useTemplateStore = () => {
     version,
     condition,
     loop,
+    dynamicTable,
     signature, // ← signatures via variables
     getContract,
     setFromContract,

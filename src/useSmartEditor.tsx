@@ -4,6 +4,7 @@ import { useLiveEditor } from './useLiveEditor';
 import { Variable } from './types/variable';
 import { Condition } from './types/condition';
 import { Loop, LoopInput } from './types/loop';
+import { DynamicTable, DynamicTableInput } from './types/dynamicTable';
 import { TemplateContract } from './types/contract';
 import { createStyleApi } from './editorCommands';
 import { createSelectionApi, SelectionType } from './selectionApi';
@@ -190,12 +191,36 @@ export const useSmartEditor = () => {
     },
   };
 
+  // DYNAMIC TABLE
+  const dynamicTable = {
+    create: (t: DynamicTableInput | DynamicTable) => templateStore.dynamicTable.create(t),
+    insert: (id: string) => {
+      const found = templateStore.dynamicTable.get(id);
+      if (!found) throw new Error(`DynamicTable "${id}" not found`);
+      liveEditor.dynamicTable.insert(found);
+    },
+    update: (t: DynamicTable) => {
+      templateStore.dynamicTable.update(t);
+      liveEditor.dynamicTable.rewrite(t);
+    },
+    delete: (id: string) => {
+      templateStore.dynamicTable.delete(id);
+      liveEditor.dynamicTable.remove(id);
+    },
+    get: (id: string) => templateStore.dynamicTable.get(id),
+    getAll: () => templateStore.dynamicTable.all(),
+    onClick: (handler: (e: { type: 'dynamicTable'; tableId: string }) => void) => {
+      liveEditor.dynamicTable.onClick(handler);
+    },
+  };
+
   return {
     style,
     template,
     variable,     // <-- unique (inline + signature)
     condition,
     loop,
+    dynamicTable,
     _templateStore: templateStore,
     _templateStoreVersion: templateStore.version,
     _liveEditor: liveEditor,
