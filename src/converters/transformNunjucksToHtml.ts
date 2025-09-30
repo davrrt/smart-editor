@@ -1,5 +1,6 @@
 import { Condition } from "../types/condition";
 import { Loop } from "../types/loop";
+import { DynamicTable } from "../types/dynamicTable";
 import { SignatureZoneEditorMeta } from "../types/signature";
 import { Variable } from "../types/variable";
 
@@ -8,7 +9,8 @@ export function transformNunjucksToHtml(
   contractConditions?: Condition[],
   contractLoops?: Loop[],
   variables?: Variable[],
-  processedSignatureIds: Set<string> = new Set()
+  processedSignatureIds: Set<string> = new Set(),
+  dynamicTables?: DynamicTable[]
 ): string {
   const displayToNameMap = Object.fromEntries(
     (variables || []).map(v => [v.displayName?.toLowerCase(), v.name])
@@ -25,12 +27,26 @@ export function transformNunjucksToHtml(
   });
 
 
-  // 1. Boucles
+  // 1. Tableaux dynamiques (avant les boucles normales pour éviter les conflits)
+  html = html.replace(
+    /{%\s*for\s+([^\s]+)\s+in\s+([^\s%]+)\s*%}\s*<table([^>]*)>([\s\S]*?)<\/table>\s*{%\s*endfor\s*%}/g,
+    (_, alias, source, tableAttrs, content) => {
+      const loopExpr = `${alias} in ${source}`;
+      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, processedSignatureIds, dynamicTables);
+      const displayName = dynamicTables?.find(
+        t => t.itemName === alias && t.listName === source
+      )?.label || `Tableau: ${source}`;
+
+      return `<table data-nunjucks-for="${loopExpr}" data-display-name="${displayName}"${tableAttrs}>${inner}</table>`;
+    }
+  );
+
+  // 2. Boucles normales
   html = html.replace(
     /{%\s*for\s+([^\s]+)\s+in\s+([^\s%]+)\s*%}([\s\S]*?){%\s*endfor\s*%}/g,
     (_, alias, source, content) => {
       const loopExpr = `${alias} in ${source}`;
-      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, processedSignatureIds);
+      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, processedSignatureIds, dynamicTables);
       const displayName = contractLoops?.find(
         l => l.alias === alias && l.source === source
       )?.label || loopExpr;
@@ -39,11 +55,11 @@ export function transformNunjucksToHtml(
     }
   );
 
-  // 2. Conditions
+  // 3. Conditions
   html = html.replace(
     /{%\s*if\s+(.+?)\s*%}([\s\S]*?){%\s*endif\s*%}/g,
     (_, expression: string, content: string) => {
-      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, processedSignatureIds);
+      const inner = transformNunjucksToHtml(content.trim(), contractConditions, contractLoops, variables, processedSignatureIds, dynamicTables);
 
       const displayName =
         contractConditions?.find(c => c.expression === expression)?.label || expression;
@@ -54,7 +70,7 @@ export function transformNunjucksToHtml(
 
 
 
-  // 3. Variables
+  // 4. Variables
   html = html.replace(/{{\s*(.*?)\s*}}/g, (_, expr) => {
     const safe = expr.replace(/"/g, '&quot;').trim();
 
@@ -67,7 +83,7 @@ export function transformNunjucksToHtml(
   });
 
 
-  // 4. Signature zones (compat: on accepte anciens attributs, on sort un ancrage propre)
+  // 5. Signature zones (compat: on accepte anciens attributs, on sort un ancrage propre)
 html = html.replace(
   /<div\s+class="ck-signature-zone"([\s\S]*?)>([\s\S]*?)<\/div>/g,
   (fullMatch, attrsChunk, innerContent) => {

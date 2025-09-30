@@ -34,6 +34,16 @@ export function transformHtmlToNunjucks(html: string): string {
     div.replaceWith(...Array.from(template.content.childNodes));
   });
 
+  // Tableaux dynamiques
+  doc.querySelectorAll('table[data-nunjucks-for]').forEach(table => {
+    const loopExpr = table.getAttribute('data-nunjucks-for') || 'item in collection';
+    const content = table.innerHTML;
+
+    const template = document.createElement('template');
+    template.innerHTML = `{% for ${loopExpr} %}<table class="dynamic-table">\n${content}\n</table>{% endfor %}`;
+    table.replaceWith(...Array.from(template.content.childNodes));
+  });
+
   // Nettoyage de bannière
   doc.querySelectorAll('.ck-banner').forEach(div => div.removeAttribute('style'));
 

@@ -95,4 +95,28 @@ describe('transformNunjucksToHtml', () => {
     expect(output).toContain('data-name="signataires.signature"');
     expect(output).toContain('data-id="sig-1"');
   });
+
+  it('transforme un tableau dynamique nunjucks en HTML avec data-nunjucks-for', () => {
+    const dynamicTables = [{
+      id: 'table-1',
+      label: 'Tableau des utilisateurs',
+      listName: 'users',
+      itemName: 'user',
+      columns: [
+        { name: 'nom', label: 'Nom' },
+        { name: 'email', label: 'Email' }
+      ]
+    }];
+
+    const raw = `{% for user in users %}<table class="dynamic-table">
+      <thead><tr><th>Nom</th><th>Email</th></tr></thead>
+      <tbody><tr><td>{{ user.nom }}</td><td>{{ user.email }}</td></tr></tbody>
+    </table>{% endfor %}`;
+
+    const output = transformNunjucksToHtml(raw, [], [], [], new Set(), dynamicTables);
+    expect(output).toContain('data-nunjucks-for="user in users"');
+    expect(output).toContain('data-display-name="Tableau des utilisateurs"');
+    expect(output).toContain('<span class="nunjucks-variable" data-name="user.nom">user.nom</span>');
+    expect(output).toContain('<span class="nunjucks-variable" data-name="user.email">user.email</span>');
+  });
 });

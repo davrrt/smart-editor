@@ -55,4 +55,17 @@ describe('transformHtmlToNunjucks', () => {
     expect(output).toContain('.ck-signature-zone[data-align="left"]');
     expect(output).toContain('.ck-signature-zone[data-align="right"]');
   });
+
+  it('transforme un tableau dynamique en bloc nunjucks', () => {
+    const html = `<table data-nunjucks-for="user in users" class="dynamic-table">
+      <thead><tr><th>Nom</th><th>Email</th></tr></thead>
+      <tbody><tr><td><span class="nunjucks-variable" data-name="user.nom">user.nom</span></td><td><span class="nunjucks-variable" data-name="user.email">user.email</span></td></tr></tbody>
+    </table>`;
+    const output = transformHtmlToNunjucks(html);
+    expect(output).toContain('{% for user in users %}');
+    expect(output).toContain('<table class="dynamic-table">');
+    expect(output).toContain('{{ user.nom }}');
+    expect(output).toContain('{{ user.email }}');
+    expect(output).toContain('{% endfor %}');
+  });
 });

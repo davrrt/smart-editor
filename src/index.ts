@@ -27,6 +27,7 @@ export * from './types/condition';
 export * from './types/loop';
 export * from './types/signature';
 export * from './types/contract';
+export * from './types/dynamicTable';
 
 /**
  * Backend utilities - 2 helpers essentiels
