@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/davrrt/smart-editor/compare/v1.8.0...v1.8.1) (2025-09-30)
+
+
+### Bug Fixes
+
+* rajout sur api smartEditor ([c93afec](https://github.com/davrrt/smart-editor/commit/c93afec60d22084788205254bb51a7baa378b735))
+
 # [1.8.0](https://github.com/davrrt/smart-editor/compare/v1.7.6...v1.8.0) (2025-09-30)
 
 
