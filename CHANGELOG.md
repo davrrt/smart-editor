@@ -1,3 +1,10 @@
+## [1.8.7](https://github.com/davrrt/smart-editor/compare/v1.8.6...v1.8.7) (2025-09-30)
+
+
+### Bug Fixes
+
+* debud dynamic table ([ed723b4](https://github.com/davrrt/smart-editor/commit/ed723b41cdf9a5d782d9e8fae8b4a4f73c9dd814))
+
 ## [1.8.6](https://github.com/davrrt/smart-editor/compare/v1.8.5...v1.8.6) (2025-09-30)
 
 
