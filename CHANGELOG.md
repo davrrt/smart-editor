@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/davrrt/smart-editor/compare/v1.8.1...v1.8.2) (2025-09-30)
+
+
+### Bug Fixes
+
+* debug table dynamic ([14e693c](https://github.com/davrrt/smart-editor/commit/14e693cd7945820dd176f497026b273c307c2516))
+
 ## [1.8.1](https://github.com/davrrt/smart-editor/compare/v1.8.0...v1.8.1) (2025-09-30)
 
 
