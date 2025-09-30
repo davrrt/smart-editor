@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/davrrt/smart-editor/compare/v1.7.6...v1.8.0) (2025-09-30)
+
+
+### Features
+
+* tableau dynamique ([7e7f855](https://github.com/davrrt/smart-editor/commit/7e7f855c047d317809f121277afa6998d156a411))
+
 ## [1.7.6](https://github.com/davrrt/smart-editor/compare/v1.7.5...v1.7.6) (2025-09-29)
 
 
