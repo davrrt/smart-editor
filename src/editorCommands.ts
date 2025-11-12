@@ -6,6 +6,10 @@ export type HeadingLevel =
   | 'paragraph'
   | 1 | 2 | 3 | 4 | 5 | 6
   | 'heading1' | 'heading2' | 'heading3' | 'heading4' | 'heading5' | 'heading6';
+type TableSplitDirection = 'both' | 'horizontal' | 'vertical';
+type TableAlignment = 'left' | 'center' | 'right';
+type VerticalAlignment = 'top' | 'middle' | 'bottom';
+type HorizontalAlignment = 'left' | 'center' | 'right' | 'justify';
 
 function normalizeUrl(href: string) {
   if (!href) return href;
@@ -58,7 +62,136 @@ function runAny(editor: any, names: string[], arg?: any) {
 export function createStyleApi(getEditor: () => any) {
   const get = () => getEditor();
 
-  return {
+  const callTablePlugin = <T>(method: string, args: any[], fallback: () => T) => {
+    const editor = get();
+    const pluginApi = editor?.style?.table;
+    if (pluginApi && typeof pluginApi[method] === 'function') {
+      return pluginApi[method](...args);
+    }
+    return fallback();
+  };
+
+  const table = {
+    insert: (rows = 2, columns = 2) =>
+      callTablePlugin('insert', [rows, columns], () =>
+        run(get(), 'insertTable', { rows, columns })
+      ),
+    insertRowAbove: () =>
+      callTablePlugin('insertRowAbove', [], () => run(get(), 'insertTableRowAbove')),
+    insertRowBelow: () =>
+      callTablePlugin('insertRowBelow', [], () => run(get(), 'insertTableRowBelow')),
+    insertColumnLeft: () =>
+      callTablePlugin('insertColumnLeft', [], () => run(get(), 'insertTableColumnLeft')),
+    insertColumnRight: () =>
+      callTablePlugin('insertColumnRight', [], () => run(get(), 'insertTableColumnRight')),
+    removeRow: () =>
+      callTablePlugin('removeRow', [], () => run(get(), 'removeTableRow')),
+    removeColumn: () =>
+      callTablePlugin('removeColumn', [], () => run(get(), 'removeTableColumn')),
+    mergeCells: () =>
+      callTablePlugin('mergeCells', [], () => run(get(), 'mergeTableCells')),
+    splitCell: (direction: TableSplitDirection = 'both') => {
+      const map: Record<TableSplitDirection, string> = {
+        both: 'splitTableCell',
+        horizontal: 'splitTableCellHorizontally',
+        vertical: 'splitTableCellVertically'
+      };
+      return callTablePlugin('splitCell', [direction], () => {
+        const commandName = map[direction] ?? 'splitTableCell';
+        return run(get(), commandName);
+      });
+    },
+    openTableProperties: () =>
+      callTablePlugin('openTableProperties', [], () => run(get(), 'tableProperties')),
+    openCellProperties: () =>
+      callTablePlugin('openCellProperties', [], () => run(get(), 'tableCellProperties')),
+    setTableProperties: (properties: Record<string, any>) =>
+      callTablePlugin('setTableProperties', [properties], () =>
+        run(get(), 'tableProperties', properties)
+      ),
+    setCellProperties: (properties: Record<string, any>) =>
+      callTablePlugin('setCellProperties', [properties], () =>
+        run(get(), 'tableCellProperties', properties)
+      ),
+    setBorder: (options: { color?: string; style?: string; width?: string }) =>
+      callTablePlugin('setBorder', [options], () =>
+        run(get(), 'tableProperties', {
+          borderColor: options.color,
+          borderStyle: options.style,
+          borderWidth: options.width,
+        })
+      ),
+    setBackground: (color: string) =>
+      callTablePlugin('setBackground', [color], () =>
+        run(get(), 'tableProperties', { backgroundColor: color })
+      ),
+    setCellBackground: (color: string) =>
+      callTablePlugin('setCellBackground', [color], () =>
+        run(get(), 'tableCellProperties', { backgroundColor: color })
+      ),
+    setTableAlignment: (alignment: TableAlignment) =>
+      callTablePlugin('setTableAlignment', [alignment], () =>
+        run(get(), 'tableProperties', { alignment })
+      ),
+    setTablePadding: (padding: string) =>
+      callTablePlugin('setTablePadding', [padding], () =>
+        run(get(), 'tableProperties', { padding })
+      ),
+    setCellPadding: (padding: string) =>
+      callTablePlugin('setCellPadding', [padding], () =>
+        run(get(), 'tableCellProperties', { padding })
+      ),
+    setCellBorder: (options: { color?: string; style?: string; width?: string }) =>
+      callTablePlugin('setCellBorder', [options], () =>
+        run(get(), 'tableCellProperties', {
+          borderColor: options.color,
+          borderStyle: options.style,
+          borderWidth: options.width,
+        })
+      ),
+    setCellAlignment: ({
+      horizontal,
+      vertical,
+    }: {
+      horizontal?: HorizontalAlignment;
+      vertical?: VerticalAlignment;
+    } = {}) =>
+      callTablePlugin('setCellAlignment', [{ horizontal, vertical }], () =>
+        run(get(), 'tableCellProperties', {
+          horizontalAlignment: horizontal,
+          verticalAlignment: vertical,
+        })
+      ),
+    isEnabled: (commandName: string) =>
+      callTablePlugin('isEnabled', [commandName], () => {
+        const editor = get();
+        const cmd = editor?.commands?.get?.(commandName);
+        return !!cmd?.isEnabled;
+      }),
+    availableCommands: () =>
+      callTablePlugin('availableCommands', [], () => {
+        const editor = get();
+        if (!editor) return [];
+        const commands = [
+          'insertTable',
+          'insertTableRowAbove',
+          'insertTableRowBelow',
+          'insertTableColumnLeft',
+          'insertTableColumnRight',
+          'removeTableRow',
+          'removeTableColumn',
+          'mergeTableCells',
+          'splitTableCell',
+          'splitTableCellHorizontally',
+          'splitTableCellVertically',
+          'tableProperties',
+          'tableCellProperties',
+        ];
+        return commands.filter((name) => editor.commands?.get?.(name));
+      }),
+  };
+
+  const api = {
 
     // === Actions de base ===
     undo: () => run(get(), 'undo'),
@@ -127,27 +260,39 @@ export function createStyleApi(getEditor: () => any) {
     // === Table (Table, TableToolbar) ===
 
     /** Insère un tableau rows x columns (ex: 3x3). */
-    insertTable: (rows = 3, columns = 3) =>
-      run(get(), 'insertTable', { rows, columns }),
+    insertTable: (rows = 3, columns = 3) => table.insert(rows, columns),
 
     // Lignes
-    insertRowAbove: () => run(get(), 'insertTableRowAbove'),
-    insertRowBelow: () => run(get(), 'insertTableRowBelow'),
-    removeRow:     () => run(get(), 'removeTableRow'),
+    insertRowAbove: () => table.insertRowAbove(),
+    insertRowBelow: () => table.insertRowBelow(),
+    removeRow:     () => table.removeRow(),
 
     // Colonnes
-    insertColumnLeft:  () => run(get(), 'insertTableColumnLeft'),
-    insertColumnRight: () => run(get(), 'insertTableColumnRight'),
-    removeColumn:      () => run(get(), 'removeTableColumn'),
+    insertColumnLeft:  () => table.insertColumnLeft(),
+    insertColumnRight: () => table.insertColumnRight(),
+    removeColumn:      () => table.removeColumn(),
 
     // Fusion / séparation
-    mergeCells:            () => run(get(), 'mergeTableCells'),
-    splitCellVertically:   () => run(get(), 'splitTableCellVertically'),
-    splitCellHorizontally: () => run(get(), 'splitTableCellHorizontally'),
+    mergeCells:            () => table.mergeCells(),
+    splitCellVertically:   () => table.splitCell('vertical'),
+    splitCellHorizontally: () => table.splitCell('horizontal'),
 
     // En-têtes (si activé dans ta config)
     toggleHeaderRow: () => run(get(), 'setTableRowHeader'),
     toggleHeaderCol: () => run(get(), 'setTableColumnHeader'),
+
+    openTableProperties: () => table.openTableProperties(),
+    openCellProperties: () => table.openCellProperties(),
+    setTableProperties: (properties: Record<string, any>) => table.setTableProperties(properties),
+    setCellProperties: (properties: Record<string, any>) => table.setCellProperties(properties),
+    setTableBorder: (options: { color?: string; style?: string; width?: string }) => table.setBorder(options),
+    setTableBackground: (color: string) => table.setBackground(color),
+    setCellBackground: (color: string) => table.setCellBackground(color),
+    setTableAlignment: (alignment: TableAlignment) => table.setTableAlignment(alignment),
+    setTablePadding: (padding: string) => table.setTablePadding(padding),
+    setCellPadding: (padding: string) => table.setCellPadding(padding),
+    setCellBorder: (options: { color?: string; style?: string; width?: string }) => table.setCellBorder(options),
+    setCellAlignment: (opts: { horizontal?: HorizontalAlignment; vertical?: VerticalAlignment }) => table.setCellAlignment(opts),
 
     /** État table (capabilities) */
     tableState: () => {
@@ -155,19 +300,22 @@ export function createStyleApi(getEditor: () => any) {
       const cmd = (n: string) => ed?.commands?.get?.(n);
       return {
         can: {
-          insertTable:        !!cmd('insertTable')?.isEnabled,
-          rowAbove:           !!cmd('insertTableRowAbove')?.isEnabled,
-          rowBelow:           !!cmd('insertTableRowBelow')?.isEnabled,
-          removeRow:          !!cmd('removeTableRow')?.isEnabled,
-          colLeft:            !!cmd('insertTableColumnLeft')?.isEnabled,
-          colRight:           !!cmd('insertTableColumnRight')?.isEnabled,
-          removeColumn:       !!cmd('removeTableColumn')?.isEnabled,
-          mergeCells:         !!cmd('mergeTableCells')?.isEnabled,
-          splitVertically:    !!cmd('splitTableCellVertically')?.isEnabled,
-          splitHorizontally:  !!cmd('splitTableCellHorizontally')?.isEnabled,
+          insertTable:        table.isEnabled('insertTable'),
+          rowAbove:           table.isEnabled('insertTableRowAbove'),
+          rowBelow:           table.isEnabled('insertTableRowBelow'),
+          removeRow:          table.isEnabled('removeTableRow'),
+          colLeft:            table.isEnabled('insertTableColumnLeft'),
+          colRight:           table.isEnabled('insertTableColumnRight'),
+          removeColumn:       table.isEnabled('removeTableColumn'),
+          mergeCells:         table.isEnabled('mergeTableCells'),
+          splitVertically:    table.isEnabled('splitTableCellVertically') || table.isEnabled('splitTableCell'),
+          splitHorizontally:  table.isEnabled('splitTableCellHorizontally') || table.isEnabled('splitTableCell'),
           headerRow:          !!cmd('setTableRowHeader')?.isEnabled,
           headerCol:          !!cmd('setTableColumnHeader')?.isEnabled,
-        }
+          tableProperties:    table.isEnabled('tableProperties'),
+          cellProperties:     table.isEnabled('tableCellProperties'),
+        },
+        availableCommands: table.availableCommands(),
       };
     },
 
@@ -259,6 +407,8 @@ export function createStyleApi(getEditor: () => any) {
           splitHorizontally:  !!cmd('splitTableCellHorizontally')?.isEnabled,
           headerRow:          !!cmd('setTableRowHeader')?.isEnabled,
           headerCol:          !!cmd('setTableColumnHeader')?.isEnabled,
+          tableProperties:    !!cmd('tableProperties')?.isEnabled,
+          cellProperties:     !!cmd('tableCellProperties')?.isEnabled,
         },
       };
     },
@@ -302,8 +452,8 @@ export function createStyleApi(getEditor: () => any) {
         // table
         'insertTable','insertTableRowAbove','insertTableRowBelow','removeTableRow',
         'insertTableColumnLeft','insertTableColumnRight','removeTableColumn',
-        'mergeTableCells','splitTableCellVertically','splitTableCellHorizontally',
-        'setTableRowHeader','setTableColumnHeader'
+        'mergeTableCells','splitTableCell','splitTableCellVertically','splitTableCellHorizontally',
+        'setTableRowHeader','setTableColumnHeader','tableProperties','tableCellProperties'
       ];
 
       for (const n of names) {
@@ -322,5 +472,9 @@ export function createStyleApi(getEditor: () => any) {
 
       return () => disposers.forEach(d => d());
     },
-  };
+  } as any;
+
+  (api as any).table = table;
+
+  return api;
 }
