@@ -1,3 +1,10 @@
+## [1.8.14](https://github.com/davrrt/smart-editor/compare/v1.8.13...v1.8.14) (2025-11-12)
+
+
+### Bug Fixes
+
+* test bordure ([cf99404](https://github.com/davrrt/smart-editor/commit/cf9940444a0808daa4bf34f08a3a58469e7bd43b))
+
 ## [1.8.13](https://github.com/davrrt/smart-editor/compare/v1.8.12...v1.8.13) (2025-11-12)
 
 
