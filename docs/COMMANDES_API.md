@@ -175,6 +175,7 @@ smartEditor.style.openCellProperties()
 - `setTableBackground(color)` - Définit la couleur de fond du tableau
 - `setTableAlignment('left' | 'center' | 'right')` - Aligne le tableau
 - `setTablePadding(padding)` - Définit le padding interne du tableau
+- `getTableProperties()` - Récupère les propriétés actuellement appliquées
 
 ```typescript
 smartEditor.style.setTableProperties({
@@ -185,6 +186,7 @@ smartEditor.style.setTableBorder({ color: '#000', style: 'solid', width: '2px' }
 smartEditor.style.setTableBackground('#fff')
 smartEditor.style.setTableAlignment('right')
 smartEditor.style.setTablePadding('12px')
+const currentTable = smartEditor.style.getTableProperties()
 ```
 
 #### Propriétés des cellules
@@ -194,6 +196,7 @@ smartEditor.style.setTablePadding('12px')
 - `setCellBackground(color)` - Change la couleur de fond des cellules
 - `setCellPadding(padding)` - Définit le padding des cellules
 - `setCellAlignment({ horizontal?, vertical? })` - Gère l’alignement horizontal (`'left' | 'center' | 'right' | 'justify'`) et vertical (`'top' | 'middle' | 'bottom'`)
+- `getCellProperties()` - Récupère les propriétés actuellement appliquées
 
 ```typescript
 smartEditor.style.setCellProperties({
@@ -204,6 +207,7 @@ smartEditor.style.setCellBorder({ color: '#ccc', style: 'dashed' })
 smartEditor.style.setCellBackground('#fafafa')
 smartEditor.style.setCellPadding('6px 8px')
 smartEditor.style.setCellAlignment({ horizontal: 'center', vertical: 'top' })
+const currentCells = smartEditor.style.getCellProperties()
 ```
 
 #### En-têtes
@@ -236,8 +240,10 @@ const state = smartEditor.style.tableState()
 //     headerCol: boolean,
 //     tableProperties: boolean,
 //     cellProperties: boolean
-//   }
-//   availableCommands: string[] // Commandes réellement enregistrées côté CKEditor
+//   },
+//   availableCommands: string[],      // Commandes réellement enregistrées côté CKEditor
+//   tableProperties: Record<string, any> | null,
+//   cellProperties: Record<string, any> | null
 // }
 ```
 

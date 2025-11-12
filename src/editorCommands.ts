@@ -189,6 +189,18 @@ export function createStyleApi(getEditor: () => any) {
         ];
         return commands.filter((name) => editor.commands?.get?.(name));
       }),
+    getTableProperties: () =>
+      callTablePlugin('getTableProperties', [], () => {
+        const editor = get();
+        const command = editor?.commands?.get?.('tableProperties');
+        return command?.value ?? null;
+      }),
+    getCellProperties: () =>
+      callTablePlugin('getCellProperties', [], () => {
+        const editor = get();
+        const command = editor?.commands?.get?.('tableCellProperties');
+        return command?.value ?? null;
+      }),
   };
 
   const api = {
@@ -293,6 +305,8 @@ export function createStyleApi(getEditor: () => any) {
     setCellPadding: (padding: string) => table.setCellPadding(padding),
     setCellBorder: (options: { color?: string; style?: string; width?: string }) => table.setCellBorder(options),
     setCellAlignment: (opts: { horizontal?: HorizontalAlignment; vertical?: VerticalAlignment }) => table.setCellAlignment(opts),
+    getTableProperties: () => table.getTableProperties(),
+    getCellProperties: () => table.getCellProperties(),
 
     /** État table (capabilities) */
     tableState: () => {
@@ -316,6 +330,8 @@ export function createStyleApi(getEditor: () => any) {
           cellProperties:     table.isEnabled('tableCellProperties'),
         },
         availableCommands: table.availableCommands(),
+        tableProperties: table.getTableProperties(),
+        cellProperties: table.getCellProperties(),
       };
     },
 
