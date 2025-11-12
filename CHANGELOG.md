@@ -1,3 +1,13 @@
+## [1.8.10](https://github.com/davrrt/smart-editor/compare/v1.8.9...v1.8.10) (2025-11-12)
+
+
+### Bug Fixes
+
+* étendre l'API de style des tableaux ([4829a4c](https://github.com/davrrt/smart-editor/commit/4829a4cc8db499105aee7a859e45f2314cdabaeb))
+* exposer les getters de propriétés de table ([0dcabe8](https://github.com/davrrt/smart-editor/commit/0dcabe8562092609fa8b047bfe4393248b230600))
+* externaliser jsdom du build ([e7d9415](https://github.com/davrrt/smart-editor/commit/e7d94152ddfa171f0dff763eb0f1af2e8fd55720))
+* mettre à jour la build ckeditor ([7a5d133](https://github.com/davrrt/smart-editor/commit/7a5d133f5b709d18ccfeda0519a582e040128411))
+
 ## [1.8.9](https://github.com/davrrt/smart-editor/compare/v1.8.8...v1.8.9) (2025-09-30)
 
 
