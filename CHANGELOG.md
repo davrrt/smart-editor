@@ -1,3 +1,10 @@
+## [1.8.11](https://github.com/davrrt/smart-editor/compare/v1.8.10...v1.8.11) (2025-11-12)
+
+
+### Bug Fixes
+
+* plugin manquant ([5d86ecc](https://github.com/davrrt/smart-editor/commit/5d86ecc351a76963559f4d1225f2fae216b03769))
+
 ## [1.8.10](https://github.com/davrrt/smart-editor/compare/v1.8.9...v1.8.10) (2025-11-12)
 
 
