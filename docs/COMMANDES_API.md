@@ -210,6 +210,72 @@ smartEditor.style.setCellAlignment({ horizontal: 'center', vertical: 'top' })
 const currentCells = smartEditor.style.getCellProperties()
 ```
 
+#### Redimensionnement des colonnes
+
+Le plugin `CustomTableResize` ajoute automatiquement des poignées de redimensionnement visuelles sur les tableaux (style Google Docs). Les méthodes suivantes permettent de contrôler le redimensionnement par programmation :
+
+- `resizeTableColumn(columnIndex: number, newWidth: number)` - Redimensionne une colonne spécifique en pixels
+- `autoResizeTable()` - Active le redimensionnement automatique pour toutes les colonnes
+- `resetTableColumns()` - Réinitialise toutes les colonnes à 100px
+- `setTableColumnWidth(columnIndex: number, width: string)` - Définit une largeur spécifique (px, %, etc.)
+- `getTableColumnWidths()` - Récupère les largeurs actuelles de toutes les colonnes
+
+```typescript
+// Redimensionner la première colonne (index 0) à 200px
+smartEditor.style.resizeTableColumn(0, 200)
+
+// Redimensionner la deuxième colonne (index 1) à 150px
+smartEditor.style.resizeTableColumn(1, 150)
+
+// Auto-redimensionner toutes les colonnes
+smartEditor.style.autoResizeTable()
+
+// Réinitialiser toutes les colonnes à 100px
+smartEditor.style.resetTableColumns()
+
+// Définir une largeur avec unité spécifique
+smartEditor.style.setTableColumnWidth(0, '250px')
+smartEditor.style.setTableColumnWidth(1, '30%')
+
+// Obtenir les largeurs actuelles
+const widths = smartEditor.style.getTableColumnWidths()
+// Retourne: ['200px', '150px', 'auto', ...]
+```
+
+#### Redimensionnement des lignes (hauteur des cellules)
+
+Le plugin `CustomTableResize` permet également de contrôler la hauteur des lignes/cellules :
+
+- `resizeTableRow(rowIndex: number, newHeight: number)` - Redimensionne une ligne spécifique en pixels
+- `autoResizeTableRows()` - Active le redimensionnement automatique pour toutes les lignes
+- `resetTableRows()` - Réinitialise toutes les lignes à leur hauteur par défaut
+- `setTableRowHeight(rowIndex: number, height: string)` - Définit une hauteur spécifique (px, %, etc.)
+- `getTableRowHeights()` - Récupère les hauteurs actuelles de toutes les lignes
+
+```typescript
+// Redimensionner la première ligne (index 0) à 50px de hauteur
+smartEditor.style.resizeTableRow(0, 50)
+
+// Redimensionner la deuxième ligne (index 1) à 80px
+smartEditor.style.resizeTableRow(1, 80)
+
+// Auto-redimensionner toutes les lignes
+smartEditor.style.autoResizeTableRows()
+
+// Réinitialiser toutes les lignes
+smartEditor.style.resetTableRows()
+
+// Définir une hauteur avec unité spécifique
+smartEditor.style.setTableRowHeight(0, '60px')
+smartEditor.style.setTableRowHeight(1, 'auto')
+
+// Obtenir les hauteurs actuelles
+const heights = smartEditor.style.getTableRowHeights()
+// Retourne: ['50px', '80px', 'auto', ...]
+```
+
+**Note** : Les poignées de redimensionnement visuelles apparaissent automatiquement au survol des bordures de colonnes dans l'éditeur, permettant un redimensionnement interactif à la souris.
+
 #### En-têtes
 
 - `toggleHeaderRow()` - Active/désactive l'en-tête de ligne
@@ -243,7 +309,9 @@ const state = smartEditor.style.tableState()
 //   },
 //   availableCommands: string[],      // Commandes réellement enregistrées côté CKEditor
 //   tableProperties: Record<string, any> | null,
-//   cellProperties: Record<string, any> | null
+//   cellProperties: Record<string, any> | null,
+//   columnWidths: string[],           // Largeurs actuelles des colonnes (ex: ['200px', '150px', 'auto'])
+//   rowHeights: string[]              // Hauteurs actuelles des lignes (ex: ['50px', '80px', 'auto'])
 // }
 ```
 

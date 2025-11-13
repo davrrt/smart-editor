@@ -201,6 +201,107 @@ export function createStyleApi(getEditor: () => any) {
         const command = editor?.commands?.get?.('tableCellProperties');
         return command?.value ?? null;
       }),
+    // === Table Resize methods (via editor.style.table) ===
+    resizeColumn: (columnIndex: number, newWidth: number) => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.resizeColumn) {
+        return pluginApi.resizeColumn(columnIndex, newWidth);
+      }
+      // Fallback sur editor.style directement
+      if (ed?.style?.resizeTableColumn) {
+        return ed.style.resizeTableColumn(columnIndex, newWidth);
+      }
+      return false;
+    },
+    autoResize: () => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.autoResize) {
+        return pluginApi.autoResize();
+      }
+      if (ed?.style?.autoResizeTable) {
+        return ed.style.autoResizeTable();
+      }
+      return false;
+    },
+    resetColumns: () => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.resetColumns) {
+        return pluginApi.resetColumns();
+      }
+      if (ed?.style?.resetTableColumns) {
+        return ed.style.resetTableColumns();
+      }
+      return false;
+    },
+    setColumnWidth: (columnIndex: number, width: string) => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.setColumnWidth) {
+        return pluginApi.setColumnWidth(columnIndex, width);
+      }
+      if (ed?.style?.setTableColumnWidth) {
+        return ed.style.setTableColumnWidth(columnIndex, width);
+      }
+      return false;
+    },
+    getColumnWidths: (): string[] => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.getColumnWidths) {
+        return pluginApi.getColumnWidths();
+      }
+      if (ed?.style?.getTableColumnWidths) {
+        return ed.style.getTableColumnWidths();
+      }
+      return [];
+    },
+    resizeRow: (rowIndex: number, newHeight: number) => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.resizeRow) {
+        return pluginApi.resizeRow(rowIndex, newHeight);
+      }
+      if (ed?.style?.resizeTableRow) {
+        return ed.style.resizeTableRow(rowIndex, newHeight);
+      }
+      return false;
+    },
+    resetRows: () => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.resetRows) {
+        return pluginApi.resetRows();
+      }
+      if (ed?.style?.resetTableRows) {
+        return ed.style.resetTableRows();
+      }
+      return false;
+    },
+    setRowHeight: (rowIndex: number, height: string) => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.setRowHeight) {
+        return pluginApi.setRowHeight(rowIndex, height);
+      }
+      if (ed?.style?.setTableRowHeight) {
+        return ed.style.setTableRowHeight(rowIndex, height);
+      }
+      return false;
+    },
+    getRowHeights: (): string[] => {
+      const ed = get();
+      const pluginApi = ed?.style?.table;
+      if (pluginApi?.getRowHeights) {
+        return pluginApi.getRowHeights();
+      }
+      if (ed?.style?.getTableRowHeights) {
+        return ed.style.getTableRowHeights();
+      }
+      return [];
+    },
   };
 
   const api = {
@@ -345,6 +446,44 @@ export function createStyleApi(getEditor: () => any) {
       return [];
     },
 
+    // === Table Row Height (CustomTableResize plugin) ===
+    resizeTableRow: (rowIndex: number, newHeight: number) => {
+      const ed = get();
+      if (ed?.style?.resizeTableRow) {
+        return ed.style.resizeTableRow(rowIndex, newHeight);
+      }
+      return false;
+    },
+    autoResizeTableRows: () => {
+      const ed = get();
+      // Le plugin n'expose pas autoResizeTableRows, on utilise resetTableRows qui met à 'auto'
+      if (ed?.style?.resetTableRows) {
+        return ed.style.resetTableRows();
+      }
+      return false;
+    },
+    resetTableRows: () => {
+      const ed = get();
+      if (ed?.style?.resetTableRows) {
+        return ed.style.resetTableRows();
+      }
+      return false;
+    },
+    setTableRowHeight: (rowIndex: number, height: string) => {
+      const ed = get();
+      if (ed?.style?.setTableRowHeight) {
+        return ed.style.setTableRowHeight(rowIndex, height);
+      }
+      return false;
+    },
+    getTableRowHeights: (): string[] => {
+      const ed = get();
+      if (ed?.style?.getTableRowHeights) {
+        return ed.style.getTableRowHeights();
+      }
+      return [];
+    },
+
     /** État table (capabilities) */
     tableState: () => {
       const ed = get();
@@ -373,6 +512,13 @@ export function createStyleApi(getEditor: () => any) {
           const ed = get();
           if (ed?.style?.getTableColumnWidths) {
             return ed.style.getTableColumnWidths();
+          }
+          return [];
+        })(),
+        rowHeights: (() => {
+          const ed = get();
+          if (ed?.style?.getTableRowHeights) {
+            return ed.style.getTableRowHeights();
           }
           return [];
         })(),
