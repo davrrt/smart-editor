@@ -308,6 +308,43 @@ export function createStyleApi(getEditor: () => any) {
     getTableProperties: () => table.getTableProperties(),
     getCellProperties: () => table.getCellProperties(),
 
+    // === Table Resize (CustomTableResize plugin) ===
+    resizeTableColumn: (columnIndex: number, newWidth: number) => {
+      const ed = get();
+      if (ed?.style?.resizeTableColumn) {
+        return ed.style.resizeTableColumn(columnIndex, newWidth);
+      }
+      return false;
+    },
+    autoResizeTable: () => {
+      const ed = get();
+      if (ed?.style?.autoResizeTable) {
+        return ed.style.autoResizeTable();
+      }
+      return false;
+    },
+    resetTableColumns: () => {
+      const ed = get();
+      if (ed?.style?.resetTableColumns) {
+        return ed.style.resetTableColumns();
+      }
+      return false;
+    },
+    setTableColumnWidth: (columnIndex: number, width: string) => {
+      const ed = get();
+      if (ed?.style?.setTableColumnWidth) {
+        return ed.style.setTableColumnWidth(columnIndex, width);
+      }
+      return false;
+    },
+    getTableColumnWidths: (): string[] => {
+      const ed = get();
+      if (ed?.style?.getTableColumnWidths) {
+        return ed.style.getTableColumnWidths();
+      }
+      return [];
+    },
+
     /** État table (capabilities) */
     tableState: () => {
       const ed = get();
@@ -332,6 +369,13 @@ export function createStyleApi(getEditor: () => any) {
         availableCommands: table.availableCommands(),
         tableProperties: table.getTableProperties(),
         cellProperties: table.getCellProperties(),
+        columnWidths: (() => {
+          const ed = get();
+          if (ed?.style?.getTableColumnWidths) {
+            return ed.style.getTableColumnWidths();
+          }
+          return [];
+        })(),
       };
     },
 
