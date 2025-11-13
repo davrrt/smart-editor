@@ -1,3 +1,10 @@
+## [1.8.17](https://github.com/davrrt/smart-editor/compare/v1.8.16...v1.8.17) (2025-11-13)
+
+
+### Bug Fixes
+
+* api resize table ([598c53b](https://github.com/davrrt/smart-editor/commit/598c53bfde9b316bf395d37d13ee851fa4f83d67))
+
 ## [1.8.16](https://github.com/davrrt/smart-editor/compare/v1.8.15...v1.8.16) (2025-11-13)
 
 
