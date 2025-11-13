@@ -1,3 +1,10 @@
+## [1.8.19](https://github.com/davrrt/smart-editor/compare/v1.8.18...v1.8.19) (2025-11-13)
+
+
+### Bug Fixes
+
+* rajout gestion de ligne ([b3b9c87](https://github.com/davrrt/smart-editor/commit/b3b9c87f48fa79a579706a080de73d3b91fdd788))
+
 ## [1.8.18](https://github.com/davrrt/smart-editor/compare/v1.8.17...v1.8.18) (2025-11-13)
 
 
