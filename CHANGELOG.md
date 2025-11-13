@@ -1,3 +1,10 @@
+## [1.8.16](https://github.com/davrrt/smart-editor/compare/v1.8.15...v1.8.16) (2025-11-13)
+
+
+### Bug Fixes
+
+* resize tableau ([1cd35f5](https://github.com/davrrt/smart-editor/commit/1cd35f534e8e704fd8483c7dbf43977786039e31))
+
 ## [1.8.15](https://github.com/davrrt/smart-editor/compare/v1.8.14...v1.8.15) (2025-11-12)
 
 
