@@ -162,6 +162,25 @@ export function createStyleApi(getEditor: () => any) {
           verticalAlignment: vertical,
         })
       ),
+    setTableBorderRadius: (radius: string) =>
+      callTablePlugin('setTableBorderRadius', [radius], () => {
+        const editor = get();
+        if (editor?.style?.setTableBorderRadius) {
+          return editor.style.setTableBorderRadius(radius);
+        }
+        return run(get(), 'tableProperties', { borderRadius: radius });
+      }),
+    getTableBorderRadius: () =>
+      callTablePlugin('getTableBorderRadius', [], () => {
+        const editor = get();
+        if (editor?.style?.getTableBorderRadius) {
+          return editor.style.getTableBorderRadius();
+        }
+        const props = editor?.commands?.get?.('tableProperties')?.value;
+        if (props?.borderRadius) return props.borderRadius;
+        if (props?.style?.borderRadius) return props.style.borderRadius;
+        return '0px';
+      }),
     isEnabled: (commandName: string) =>
       callTablePlugin('isEnabled', [commandName], () => {
         const editor = get();
@@ -401,6 +420,8 @@ export function createStyleApi(getEditor: () => any) {
     setTableBorder: (options: { color?: string; style?: string; width?: string }) => table.setBorder(options),
     setTableBackground: (color: string) => table.setBackground(color),
     setCellBackground: (color: string) => table.setCellBackground(color),
+    setTableBorderRadius: (radius: string) => table.setTableBorderRadius(radius),
+    getTableBorderRadius: () => table.getTableBorderRadius(),
     setTableAlignment: (alignment: TableAlignment) => table.setTableAlignment(alignment),
     setTablePadding: (padding: string) => table.setTablePadding(padding),
     setCellPadding: (padding: string) => table.setCellPadding(padding),
@@ -521,6 +542,16 @@ export function createStyleApi(getEditor: () => any) {
             return ed.style.getTableRowHeights();
           }
           return [];
+        })(),
+        borderRadius: (() => {
+          const ed = get();
+          if (ed?.style?.getTableBorderRadius) {
+            return ed.style.getTableBorderRadius();
+          }
+          const props = ed?.commands?.get?.('tableProperties')?.value;
+          if (props?.borderRadius) return props.borderRadius;
+          if (props?.style?.borderRadius) return props.style.borderRadius;
+          return '0px';
         })(),
       };
     },

@@ -176,6 +176,8 @@ smartEditor.style.openCellProperties()
 - `setTableAlignment('left' | 'center' | 'right')` - Aligne le tableau
 - `setTablePadding(padding)` - Définit le padding interne du tableau
 - `getTableProperties()` - Récupère les propriétés actuellement appliquées
+- `setTableBorderRadius(radius)` - Définit l'arrondi des bordures (ex: `8px`, `0.5rem`)
+- `getTableBorderRadius()` - Récupère l'arrondi actuel des bordures
 
 ```typescript
 smartEditor.style.setTableProperties({
@@ -186,7 +188,9 @@ smartEditor.style.setTableBorder({ color: '#000', style: 'solid', width: '2px' }
 smartEditor.style.setTableBackground('#fff')
 smartEditor.style.setTableAlignment('right')
 smartEditor.style.setTablePadding('12px')
+smartEditor.style.setTableBorderRadius('12px')
 const currentTable = smartEditor.style.getTableProperties()
+const radius = smartEditor.style.getTableBorderRadius()
 ```
 
 #### Propriétés des cellules
@@ -312,6 +316,7 @@ const state = smartEditor.style.tableState()
 //   cellProperties: Record<string, any> | null,
 //   columnWidths: string[],           // Largeurs actuelles des colonnes (ex: ['200px', '150px', 'auto'])
 //   rowHeights: string[]              // Hauteurs actuelles des lignes (ex: ['50px', '80px', 'auto'])
+//   borderRadius: string              // Arrondi actuel des bordures (ex: '12px')
 // }
 ```
 
