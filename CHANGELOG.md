@@ -1,3 +1,10 @@
+## [1.8.18](https://github.com/davrrt/smart-editor/compare/v1.8.17...v1.8.18) (2025-11-13)
+
+
+### Bug Fixes
+
+* erreur de resize ([9b8a873](https://github.com/davrrt/smart-editor/commit/9b8a873a891d8daf39720e624782f22d62ede851))
+
 ## [1.8.17](https://github.com/davrrt/smart-editor/compare/v1.8.16...v1.8.17) (2025-11-13)
 
 
