@@ -1,3 +1,10 @@
+## [1.8.23](https://github.com/davrrt/smart-editor/compare/v1.8.22...v1.8.23) (2025-11-13)
+
+
+### Bug Fixes
+
+* debug border radius ([fc60f47](https://github.com/davrrt/smart-editor/commit/fc60f4707d25767b8bb69d8b51ab8b322260a7a7))
+
 ## [1.8.22](https://github.com/davrrt/smart-editor/compare/v1.8.21...v1.8.22) (2025-11-13)
 
 
